@@ -150,7 +150,6 @@ export default function App() {
 
   // Phones get the app full-screen; bigger screens get a device frame.
   const framed = vp.w >= 560;
-  const showPanel = vp.w >= 1000;
 
   if (!framed) {
     return (
@@ -165,41 +164,6 @@ export default function App() {
 
   return (
     <div className="app app-desktop">
-      {showPanel && (
-        <aside className="panel">
-          <div className="panel-head">
-            <span className="panel-kicker">Clickable prototype</span>
-            <h1>IIT Roorkee Academic Super App</h1>
-            <p>
-              Tap through it like the real app. It runs on dummy data, so any enrollment number, password and
-              code will log you in.
-            </p>
-            <div className="panel-actions">
-              <button type="button" onClick={() => navigate(manifest.start)}>Start from login</button>
-              <button type="button" onClick={() => navigate(manifest.home)}>Go to Home</button>
-            </div>
-          </div>
-          <nav className="panel-list" aria-label="All screens">
-            <span className="panel-list-label">All screens ({manifest.order.length})</span>
-            <ol>
-              {manifest.order.map(([n, title]) => (
-                <li key={n}>
-                  <a
-                    href={'#/' + n}
-                    aria-current={n === route.name ? 'page' : undefined}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      navigate(n);
-                    }}
-                  >
-                    {title}
-                  </a>
-                </li>
-              ))}
-            </ol>
-          </nav>
-        </aside>
-      )}
       <main className="stage">
         <div className="frame-scale" style={{ zoom: scale }}>
           <Device name={route.name} visit={route.visit} onNavigate={navigate} framed />

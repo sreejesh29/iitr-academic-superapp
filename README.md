@@ -18,8 +18,8 @@ The screens were designed in Claude Design and live unchanged in `src/screens/*.
 
 - `vite.config.js` compiles each screen file into a JavaScript module at build time.
 - `src/runtime/dc.js` renders the screens with React and handles state, `{{bindings}}`, `<sc-if>`, `<sc-for>` and `<dc-import>`.
-- `src/App.jsx` is the shell. It handles navigation between screens (`#/ScreenName` URLs, so the browser Back button works) and shows a phone frame with a screen list on desktop. On a phone, the app fills the screen.
-- `src/screens/screens.json` sets the start screen and the order and titles of the desktop screen list.
+- `src/App.jsx` is the shell. It handles navigation between screens (`#/ScreenName` URLs, so the browser Back button works) and shows the app in a phone frame on desktop. On a phone, the app fills the screen.
+- `src/screens/screens.json` sets the start screen and the screen titles used for the browser tab.
 
 To change a screen, edit its `.dc.html` file. The format is plain HTML with `{{bindings}}`, and the logic lives in the `<script type="text/x-dc">` block at the bottom.
 

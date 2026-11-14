@@ -43,15 +43,14 @@ body {
   width: 134px; height: 5px; border-radius: 3px; background: #0E1726; z-index: 30; pointer-events: none;
 }
 
-/* ---------- desktop: phone frame + screen list ---------- */
+/* ---------- desktop: phone frame ---------- */
 
 .app-desktop {
   min-height: 100%;
   display: flex;
   align-items: stretch;
   justify-content: center;
-  gap: 48px;
-  padding: 0 32px;
+  padding: 0 24px;
 }
 .stage { display: flex; align-items: center; justify-content: center; padding: 20px 0; }
 .device {
@@ -66,42 +65,6 @@ body {
 .device .btn-1 { left: -3px; top: 168px; height: 32px; border-radius: 2px 0 0 2px; }
 .device .btn-2 { left: -3px; top: 220px; height: 56px; border-radius: 2px 0 0 2px; }
 .device .btn-3 { right: -3px; top: 240px; height: 84px; border-radius: 0 2px 2px 0; }
-
-.panel {
-  width: 340px;
-  flex-shrink: 0;
-  height: 100vh;
-  position: sticky;
-  top: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  padding: 40px 0 24px;
-}
-.panel-kicker {
-  font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #2448C9;
-}
-.panel h1 { margin: 8px 0 10px; font-size: 26px; line-height: 1.2; font-weight: 800; letter-spacing: -0.4px; color: #13235B; }
-.panel p { margin: 0; font-size: 14px; line-height: 1.55; color: #3A4456; }
-.panel-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
-.panel-actions button {
-  height: 40px; padding: 0 16px; border-radius: 12px; border: 1px solid #C9D2EC;
-  background: #FFFFFF; color: #13235B; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
-}
-.panel-actions button:first-child { background: #13235B; border-color: #13235B; color: #FFFFFF; }
-.panel-actions button:hover { filter: brightness(0.95); }
-.panel-list { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
-.panel-list-label { font-size: 12px; font-weight: 700; color: #5B6577; text-transform: uppercase; letter-spacing: 0.06em; }
-.panel-list ol {
-  list-style: none; margin: 0; padding: 0 8px 0 0; overflow-y: auto; flex: 1;
-  display: flex; flex-direction: column; gap: 2px;
-}
-.panel-list a {
-  display: block; padding: 7px 10px; border-radius: 10px; font-size: 13px; line-height: 1.35;
-  color: #3A4456; text-decoration: none;
-}
-.panel-list a:hover { background: rgba(19, 35, 91, 0.06); color: #13235B; }
-.panel-list a[aria-current='page'] { background: #13235B; color: #FFFFFF; font-weight: 600; }
 
 /* ---------- phones: the app fills the screen ---------- */
 
