@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Campus app – Course-wise attendance</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2448C9;text-decoration:none}a:hover{color:#16308F}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+
+<div style="position: relative; width: 390px; min-height: 844px; box-sizing: border-box; background: #F3F5FA; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #0E1726; display: flex; flex-direction: column; overflow-x: clip">
+
+  <!-- Header: solid navy, stays put -->
+  <header style="position: sticky; top: 0; z-index: 0; background: #13235B; padding: 16px 16px 64px; display: flex; flex-direction: column; gap: 16px; color: #FFFFFF">
+    <div style="display: flex; align-items: center; gap: 8px">
+      <a href="{{backHref}}" aria-label="Back to Home" style="width: 44px; height: 44px; border-radius: 14px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+      </a>
+      <div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0">
+        <h1 style="margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.3">Course-wise attendance</h1>
+        <span style="font-size: 12px; color: #C9D2EC">Autumn semester 2026 | as of 12 Nov</span>
+      </div>
+    </div>
+
+    <!-- Semester summary -->
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+      <div style="padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.12); display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 12px; color: #C9D2EC">Overall</span>
+        <span style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px">{{totals.pct}}%</span>
+      </div>
+      <div style="padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.12); display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 12px; color: #C9D2EC">Attended</span>
+        <span style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px">{{totals.att}}<span style="font-size: 14px; font-weight: 700; color: #C9D2EC">/{{totals.counted}}</span></span>
+      </div>
+      <div style="padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.12); display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 12px; color: #C9D2EC">Leaves</span>
+        <span style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px">{{leaves.total}}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content sheet -->
+  <div style="position: relative; z-index: 1; margin-top: -28px; flex: 1; background: #F3F5FA; border-radius: 28px 28px 0 0; padding: 10px 0 40px; box-shadow: 0 -10px 30px rgba(14,23,38,0.22)">
+    <div aria-hidden="true" style="width: 40px; height: 5px; margin: 0 auto; border-radius: 3px; background: #C9D2EC"></div>
+
+    <!-- Leave applied: affects every class that day -->
+    <section aria-labelledby="leave-h" style="margin: 18px 16px 0; display: flex; flex-direction: column; gap: 12px">
+      <h2 id="leave-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Leaves this semester</h2>
+      <article style="background: #FFFFFF; border: 1px solid #E3E7F0; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+        <dl style="margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr))">
+          <sc-for list="{{leaves.types}}" as="t" hint-placeholder-count="3">
+            <div style="display: flex; flex-direction: column; gap: 4px; padding: 0 10px; border-left: {{t.divider}}">
+              <dt style="font-size: 12px; font-weight: 600; color: #5B6577">{{t.label}}</dt>
+              <dd style="margin: 0; font-size: 20px; line-height: 1.1; font-weight: 800; color: #0E1726">{{t.n}}</dd>
+            </div>
+          </sc-for>
+        </dl>
+      </article>
+      <a href="{{leaveHref}}" style="height: 48px; border-radius: 12px; background: #13235B; color: #FFFFFF; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 700">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+        Apply for leave
+      </a>
+    </section>
+
+    <!-- Courses -->
+    <section aria-labelledby="crs-h" style="margin: 28px 16px 0; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <h2 id="crs-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">By course</h2>
+        <span style="font-size: 13px; color: #5B6577">Classes attended out of classes held, excluding leave</span>
+      </div>
+
+      <sc-for list="{{courses}}" as="c" hint-placeholder-count="6">
+        <article aria-label="{{c.code}} {{c.name}}, {{c.pct}} percent" style="background: #FFFFFF; border: 1px solid #E3E7F0; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+
+          <div style="display: flex; align-items: center; gap: 12px">
+            <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+              <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.3px; color: #5B6577">{{c.code}}</span>
+              <h3 style="margin: 0; font-size: 17px; font-weight: 700; line-height: 1.3; letter-spacing: -0.2px">{{c.name}}</h3>
+              <span style="font-size: 13px; color: #3A4456"><strong style="font-weight: 800; color: #0E1726">{{c.att}}</strong> of {{c.counted}} classes attended</span>
+            </div>
+            <div aria-hidden="true" style="position: relative; width: 64px; height: 64px; flex-shrink: 0">
+              <svg width="64" height="64" viewBox="0 0 64 64">
+                <circle cx="32" cy="32" r="26" fill="none" stroke="#EDF0F6" stroke-width="7"></circle>
+                <circle cx="32" cy="32" r="26" fill="none" stroke="{{c.ring}}" stroke-width="7" stroke-linecap="round" stroke-dasharray="{{c.dash}}" transform="rotate(-90 32 32)"></circle>
+              </svg>
+              <span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; color: {{c.ink}}">{{c.pct}}%</span>
+            </div>
+          </div>
+
+          <!-- Split by professor -->
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <ul aria-label="Attendance by professor" style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px">
+              <sc-for list="{{c.profs}}" as="p" hint-placeholder-count="1">
+                <li style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; background: #F7F8FB">
+                  <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px">
+                    <span style="font-size: 13px; font-weight: 700">{{p.name}}</span>
+                    <span style="font-size: 12px; color: #5B6577">{{p.type}}</span>
+                  </span>
+                  <span style="flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 1px">
+                    <span style="font-size: 14px; font-weight: 800; color: #0E1726">{{p.att}}/{{p.counted}}</span>
+                    <span style="font-size: 12px; font-weight: 700; color: {{p.ink}}">{{p.pct}}%</span>
+                  </span>
+                </li>
+              </sc-for>
+            </ul>
+          </div>
+
+          <sc-if value="{{c.hasLeave}}" hint-placeholder-val="{{false}}">
+            <span style="align-self: flex-start; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 6px; background: #FFF4DB; color: #8A4B00">{{c.leaveNote}}</span>
+          </sc-if>
+
+          <sc-if value="{{c.low}}" hint-placeholder-val="{{false}}">
+            <p style="margin: 0; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; background: #FFF4DB; font-size: 13px; font-weight: 600; color: #4A2800">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A4B00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path><path d="M12 9v4M12 17h.01"></path></svg>
+              {{c.lowMsg}}
+            </p>
+          </sc-if>
+        </article>
+      </sc-for>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1852}}'>
+class Component extends DCLogic {
+  renderVals() {
+    // held = classes conducted, leave = classes on approved leave (excluded), att = attended.
+    // Percentages match Home (82% overall) and the Courses screen.
+    const RAW = [
+      { code: 'CSN-341', name: 'Computer Networks', profs: [
+        { name: 'Prof. S. Iyer', type: 'Lecture', held: 18, leave: 1, att: 15 } ] },
+      { code: 'CSN-343', name: 'Theory of Computation', profs: [
+        { name: 'Prof. R. Menon', type: 'Lecture & Tutorial', held: 19, leave: 0, att: 17 } ] },
+      { code: 'CSN-345', name: 'Software Engineering', profs: [
+        { name: 'Dr. K. Bhat', type: 'Lecture & Tutorial', held: 14, leave: 1, att: 12 },
+        { name: 'Dr. A. Sharma', type: 'Practical', held: 7, leave: 0, att: 5 } ] },
+      { code: 'CSN-361', name: 'Networks Lab', profs: [
+        { name: 'Dr. N. Rao', type: 'Practical', held: 14, leave: 0, att: 12 },
+        { name: 'Dr. P. Sen', type: 'Practical', held: 14, leave: 0, att: 10 } ] },
+      { code: 'MAN-301', name: 'Probability & Statistics', need: 2, profs: [
+        { name: 'Dr. M. Kulkarni', type: 'Lecture & Tutorial', held: 15, leave: 1, att: 10 } ] },
+      { code: 'HSN-351', name: 'Management Techniques', profs: [
+        { name: 'Prof. A. Ghosh', type: 'Lecture', held: 15, leave: 0, att: 12 } ] }
+    ];
+    const CIRC = 2 * Math.PI * 26;
+    const pctOf = (a, n) => (n ? Math.round((a / n) * 100) : 0);
+    const inkFor = (p) => (p >= 75 ? '#067647' : '#B42318');
+
+    let tAtt = 0, tCounted = 0, tLeave = 0;
+    const courses = RAW.map((c) => {
+      const att = c.profs.reduce((s, p) => s + p.att, 0);
+      const leave = c.profs.reduce((s, p) => s + p.leave, 0);
+      const counted = c.profs.reduce((s, p) => s + p.held - p.leave, 0);
+      tAtt += att; tCounted += counted; tLeave += leave;
+      const pct = pctOf(att, counted);
+      const low = pct < 75;
+      return {
+        ...c,
+        att, counted, pct,
+        ink: inkFor(pct),
+        ring: low ? '#D92D20' : '#12893F',
+        dash: (CIRC * pct / 100).toFixed(1) + ' ' + CIRC.toFixed(1),
+        hasLeave: leave > 0,
+        leaveNote: 'Leaves: ' + leave,
+        low,
+        lowMsg: 'Below 75%. Attend the next ' + (c.need || 1) + ' classes to cross it.',
+        profs: c.profs.map((p) => {
+          const n = p.held - p.leave;
+          const pp = pctOf(p.att, n);
+          return { ...p, counted: n, pct: pp, ink: inkFor(pp) };
+        })
+      };
+    });
+
+    // Leave days taken this semester by type. One medical leave (Thu, 6 Nov) is excused
+    // in every class held that day, which is what the per-course "Leaves" tags count.
+    const LEAVE_DAYS = { Medical: 1, Outstation: 0, Casual: 0 };
+    const total = Object.values(LEAVE_DAYS).reduce((s, n) => s + n, 0);
+    const leaves = {
+      total,
+      unit: total === 1 ? 'day' : 'days',
+      types: Object.keys(LEAVE_DAYS).map((k, i) => ({ label: k, n: LEAVE_DAYS[k], divider: i === 0 ? '0' : '1px solid #EDF0F6' }))
+    };
+
+    return {
+      courses, leaves,
+      totals: { att: tAtt, counted: tCounted, excused: tLeave, pct: pctOf(tAtt, tCounted) },
+      backHref: this.props.backHref || 'Main.dc.html',
+      leaveHref: this.props.leaveHref || 'Leave.dc.html'
+    };
+  }
+}
+</script>
+</body>
+</html>

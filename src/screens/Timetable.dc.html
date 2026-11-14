@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Campus app – Timetable</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2448C9;text-decoration:none}a:hover{color:#16308F}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+
+<div style="position: relative; width: 390px; min-height: 844px; box-sizing: border-box; background: #F3F5FA; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #0E1726; display: flex; flex-direction: column; overflow-x: clip">
+
+  <!-- Header: solid navy, stays put while the sheet scrolls over it -->
+  <header style="position: sticky; top: 0; z-index: 0; background: #13235B; padding: 24px 20px 64px; display: flex; flex-direction: column; gap: 20px; color: #FFFFFF">
+    <div style="display: flex; align-items: center; gap: 2px">
+      <div style="display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; padding-right: 8px">
+        <h1 style="margin: 0; font-size: 21px; font-weight: 700; letter-spacing: -0.3px">Timetable</h1>
+        <span style="font-size: 12px; color: #C9D2EC">November 2026</span>
+      </div>
+      <a href="IdCard.dc.html" aria-label="Open digital ID card" style="width: 44px; height: 44px; border-radius: 14px; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2.5"></rect><circle cx="8" cy="11" r="2"></circle><path d="M5 16a3 3 0 0 1 6 0M14 10h5M14 14h3"></path></svg>
+      </a>
+      <a href="Notifications.dc.html" aria-label="Notifications, 3 unread" style="position: relative; width: 44px; height: 44px; border-radius: 14px; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+        <span aria-hidden="true" style="position: absolute; top: 10px; right: 11px; width: 8px; height: 8px; border-radius: 50%; background: #FF8A65; box-shadow: 0 0 0 2px #13235B"></span>
+      </a>
+      <a href="Profile.dc.html" aria-label="Profile" style="width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center"><span style="position: relative; display: block; width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; overflow: hidden; background: #DCE4FF; box-shadow: 0 0 0 2px #FFFFFF;"><img src="/_blob/d380e2b78f28a976382d51f88b9181ac" alt="" style="position: absolute; left: -205%; top: -46%; height: 300%; width: auto; max-width: none"></span></a>
+    </div>
+
+    <!-- Week strip -->
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; align-items: center; justify-content: space-between">
+        <span style="display: flex; align-items: baseline; gap: 8px"><span style="font-size: 14px; font-weight: 700">Week 15</span><span style="font-size: 12px; color: #C9D2EC">9 – 14 Nov</span></span>
+        <div style="display: flex; gap: 4px">
+          <button aria-label="Previous week" style="width: 36px; height: 36px; border-radius: 10px; border: 0; background: rgba(255,255,255,0.12); color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+          </button>
+          <button aria-label="Next week" style="width: 36px; height: 36px; border-radius: 10px; border: 0; background: rgba(255,255,255,0.12); color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+          </button>
+        </div>
+      </div>
+      <div role="group" aria-label="Choose a day" style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px">
+        <sc-for list="{{days}}" as="d" hint-placeholder-count="6">
+          <button onClick="{{d.pick}}" aria-pressed="{{d.pressed}}" aria-label="{{d.long}}" style="height: 64px; border-radius: 14px; border: 0; background: {{d.bg}}; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 0">
+            <span style="font-size: 11px; font-weight: 600; color: {{d.dayInk}}">{{d.d}}</span>
+            <span style="font-size: 17px; font-weight: 800; color: {{d.dateInk}}">{{d.date}}</span>          </button>
+        </sc-for>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content sheet -->
+  <div style="position: relative; z-index: 1; margin-top: -28px; flex: 1; background: #F3F5FA; border-radius: 28px 28px 0 0; padding: 10px 0 120px; box-shadow: 0 -10px 30px rgba(14,23,38,0.22)">
+    <div aria-hidden="true" style="width: 40px; height: 5px; margin: 0 auto; border-radius: 3px; background: #C9D2EC"></div>
+
+    <section aria-labelledby="day-h" style="margin: 18px 16px 0; display: flex; flex-direction: column; gap: 16px">
+      <div style="display: flex; align-items: baseline; justify-content: space-between">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <h2 id="day-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">{{sel.long}}</h2>
+          <span style="font-size: 13px; color: #5B6577">{{summary}}</span>
+        </div>
+        <sc-if value="{{showToday}}" hint-placeholder-val="{{false}}">
+          <button onClick="{{goToday}}" style="height: 36px; padding: 0 14px; border-radius: 10px; border: 1px solid #DDE2EE; background: #FFFFFF; color: #2448C9; font-size: 13px; font-weight: 700">Today</button>
+        </sc-if>
+      </div>
+
+      <!-- Empty day -->
+      <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}">
+        <div style="background: #FFFFFF; border: 1px solid #E3E7F0; border-radius: 20px; padding: 32px 20px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center">
+          <span style="width: 56px; height: 56px; border-radius: 50%; background: #EEF2FF; color: #2448C9; display: flex; align-items: center; justify-content: center">
+            <svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2.5"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+          </span>
+          <span style="font-size: 16px; font-weight: 700">No classes scheduled</span>
+          <span style="font-size: 13px; line-height: 1.45; color: #5B6577">Enjoy the day off. Pending assignments are on Home.</span>
+        </div>
+      </sc-if>
+
+      <!-- Day calendar -->
+      <sc-if value="{{hasClasses}}" hint-placeholder-val="{{true}}">
+        <div style="position: relative; height: {{gridH}}">
+          <!-- Hour rows -->
+          <sc-for list="{{hours}}" as="h" hint-placeholder-count="11">
+            <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: {{h.top}}; display: flex; align-items: center; gap: 8px">
+              <span style="width: 44px; flex-shrink: 0; font-size: 11px; font-weight: 600; color: #5B6577; text-align: start">{{h.label}}</span>
+              <span style="flex: 1; height: 1px; background: #E3E7F0"></span>
+            </div>
+          </sc-for>
+
+          <!-- Class blocks -->
+          <div style="position: absolute; top: 0; bottom: 0; left: 56px; right: 0">
+            <sc-for list="{{classes}}" as="c" hint-placeholder-count="4">
+              <article style="position: absolute; left: 0; right: 0; top: {{c.top}}; height: {{c.height}}; min-height: {{c.minH}}; z-index: {{c.z}}; box-shadow: {{c.shadow}}; box-sizing: border-box; overflow: hidden; padding: 12px; border-radius: 16px; background: {{c.bg}}; border: {{c.border}}; display: flex; flex-direction: column; gap: 4px; color: #0E1726">
+                <span style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+                  <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.3px; color: {{c.fg}}">{{c.code}}</span>
+                  <span style="display: flex; gap: 6px">
+                    <sc-if value="{{c.isLive}}" hint-placeholder-val="{{false}}">
+                      <span style="font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: #2F5BEA; color: #FFFFFF">Now</span>
+                    </sc-if>
+                    <span style="font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: {{c.tagBg}}; color: {{c.fg}}">{{c.type}}</span>
+                  </span>
+                </span>
+                <span style="font-size: 15px; font-weight: 700; line-height: 1.25; color: {{c.ink}}">{{c.name}}</span>
+                <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #3A4456">
+                  <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+                  {{c.time}}
+                </span>
+                <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #3A4456">
+                  <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  {{c.room}}
+                </span>
+                <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #3A4456">
+                  <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>
+                  {{c.prof}}
+                </span>
+                <sc-if value="{{c.hasNote}}" hint-placeholder-val="{{false}}">
+                  <!-- Tap the note to show it in full; tap again to collapse -->
+                  <button type="button" onClick="{{c.toggleNote}}" aria-expanded="{{c.noteOpen}}" aria-label="{{c.noteAria}}" style="margin-top: 2px; display: flex; align-items: {{c.noteAlign}}; gap: 6px; padding: 4px 8px; border: 0; border-radius: 6px; background: rgba(255,255,255,0.75); font-size: 12px; line-height: 1.45; color: #0E1726; min-width: 0; text-align: left">
+                    <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8A4B00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: {{c.iconTop}}"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6M8 13h8M8 17h5"></path></svg>
+                    <span style="flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: {{c.noteWrap}}">{{c.note}}</span>
+                    <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5B6577" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: {{c.iconTop}}; transform: {{c.chevron}}"><path d="m6 9 6 6 6-6"></path></svg>
+                  </button>
+                </sc-if>
+              </article>
+            </sc-for>
+          </div>
+
+          <!-- Current time -->
+          <sc-if value="{{showNow}}" hint-placeholder-val="{{false}}">
+            <div aria-label="Current time {{nowLabel}}" style="position: absolute; left: 0; right: 0; top: {{nowTop}}; display: flex; align-items: center; gap: 0; z-index: 2">
+              <span style="width: 48px; flex-shrink: 0; font-size: 11px; font-weight: 800; color: #D92D20; text-align: right; padding-right: 2px; box-sizing: border-box">{{nowLabel}}</span>
+              <span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #D92D20; flex-shrink: 0"></span>
+              <span aria-hidden="true" style="flex: 1; height: 2px; background: #D92D20"></span>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+    </section>
+  </div>
+
+  <!-- Floating bottom nav (hidden when a phone frame draws its own fixed copy) -->
+  <sc-if value="{{showNav}}" hint-placeholder-val="{{true}}">
+  <nav aria-label="Main" style="position: absolute; z-index: 10; left: 16px; right: 16px; bottom: 28px; height: 68px; box-sizing: border-box; padding: 8px; border-radius: 999px; background: #13235B; box-shadow: 0 12px 28px rgba(19,35,91,0.30); display: flex; align-items: center; justify-content: space-between">
+    <a href="Main.dc.html" aria-label="Home" style="width: 52px; height: 52px; border-radius: 50%; color: #C9D2EC; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>
+    </a>
+    <a href="#" aria-current="page" style="height: 52px; padding: 0 16px; border-radius: 999px; background: #FFFFFF; color: #13235B; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700">
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2.5"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+      Timetable
+    </a>
+    <a href="Courses.dc.html" aria-label="Courses" style="width: 52px; height: 52px; border-radius: 50%; color: #C9D2EC; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"></path><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"></path></svg>
+    </a>
+    <a href="Chats.dc.html" aria-label="Chats, 12 unread" style="position: relative; width: 52px; height: 52px; border-radius: 50%; color: #C9D2EC; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      <span aria-hidden="true" style="position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; border-radius: 50%; background: #FF8A65; box-shadow: 0 0 0 2px #13235B"></span>
+    </a>
+    <a href="Collab.dc.html" aria-label="Collaboration" style="width: 52px; height: 52px; border-radius: 50%; color: #C9D2EC; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+    </a>
+  </nav>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2254}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { day: 'mon', openNote: null };
+  }
+  renderVals() {
+    // 180px per hour so a 55-minute card (161px) fits its tallest content, including a note.
+    const HOUR = 180, START = 8, END = 18;
+    const TODAY = 'mon';
+    const NOW = 10 + 20 / 60; // 10:20 AM
+
+    const COURSES = {
+      'CSN-341': 'Computer Networks',
+      'CSN-343': 'Theory of Computation',
+      'CSN-345': 'Software Engineering',
+      'CSN-361': 'Networks Lab',
+      'MAN-301': 'Probability & Statistics',
+      'HSN-351': 'Management Techniques'
+    };
+    const TYPE = {
+      Lecture:   { bg: '#EEF2FF', border: '1px solid #D5DEFF', tagBg: '#DCE4FF', fg: '#2448C9' },
+      Tutorial:  { bg: '#FFF4DB', border: '1px solid #F8DFA6', tagBg: '#FCE7B4', fg: '#8A4B00' },
+      Practical: { bg: '#E3F8EC', border: '1px solid #B4E8C9', tagBg: '#C8F0D8', fg: '#067647' }
+    };
+    const PAST = { bg: '#FFFFFF', border: '1px solid #E3E7F0', tagBg: '#EDF0F6', fg: '#5B6577' };
+
+    const WEEK = [
+      { key: 'mon', d: 'Mon', date: 9, long: 'Monday, 9 Nov', classes: [
+        { code: 'CSN-341', start: '09:00', end: '09:55', room: 'LHC 102', type: 'Lecture', prof: 'Prof. S. Iyer' },
+        { code: 'MAN-301', start: '10:00', end: '10:55', room: 'LHC 204', type: 'Tutorial', prof: 'Dr. M. Kulkarni', note: 'Quiz on Bayes’ theorem, bring a calculator' },
+        { code: 'HSN-351', start: '12:00', end: '12:55', room: 'LHC 104', type: 'Lecture', prof: 'Prof. A. Ghosh', note: 'Room moved from LHC 008 this week' },
+        { code: 'CSN-361', start: '14:00', end: '16:55', room: 'CSE Lab 2', type: 'Practical', prof: 'Dr. N. Rao', note: 'Lab 4: socket programming. Submit pre-lab sheet' }
+      ]},
+      { key: 'tue', d: 'Tue', date: 10, long: 'Tuesday, 10 Nov', classes: [
+        { code: 'CSN-343', start: '08:00', end: '08:55', room: 'LHC 103', type: 'Lecture', prof: 'Prof. R. Menon' },
+        { code: 'CSN-345', start: '09:00', end: '09:55', room: 'LHC 201', type: 'Lecture', prof: 'Dr. K. Bhat' },
+        { code: 'MAN-301', start: '11:00', end: '11:55', room: 'LHC 204', type: 'Lecture', prof: 'Dr. M. Kulkarni' },
+        { code: 'CSN-345', start: '15:00', end: '15:55', room: 'CSE 105', type: 'Tutorial', prof: 'Dr. K. Bhat', note: 'Bring your draft SRS for review' }
+      ]},
+      { key: 'wed', d: 'Wed', date: 11, long: 'Wednesday, 11 Nov', classes: [
+        { code: 'CSN-341', start: '09:00', end: '09:55', room: 'LHC 102', type: 'Lecture', prof: 'Prof. S. Iyer' },
+        { code: 'CSN-343', start: '10:00', end: '10:55', room: 'LHC 103', type: 'Tutorial', prof: 'Prof. R. Menon', note: 'Problem set 6 discussed in class' },
+        { code: 'HSN-351', start: '12:00', end: '12:55', room: 'LHC 008', type: 'Lecture', prof: 'Prof. A. Ghosh' }
+      ]},
+      { key: 'thu', d: 'Thu', date: 12, long: 'Thursday, 12 Nov', classes: [
+        { code: 'CSN-345', start: '08:00', end: '08:55', room: 'LHC 201', type: 'Lecture', prof: 'Dr. K. Bhat' },
+        { code: 'MAN-301', start: '10:00', end: '10:55', room: 'LHC 204', type: 'Lecture', prof: 'Dr. M. Kulkarni' },
+        { code: 'CSN-341', start: '11:00', end: '11:55', room: 'LHC 102', type: 'Lecture', prof: 'Prof. S. Iyer', note: 'Guest lecture on SDN by industry speaker' }
+      ]},
+      { key: 'fri', d: 'Fri', date: 13, long: 'Friday, 13 Nov', classes: [
+        { code: 'CSN-343', start: '09:00', end: '09:55', room: 'LHC 103', type: 'Lecture', prof: 'Prof. R. Menon' },
+        { code: 'HSN-351', start: '11:00', end: '11:55', room: 'LHC 008', type: 'Lecture', prof: 'Prof. A. Ghosh' },
+        { code: 'CSN-345', start: '14:00', end: '16:55', room: 'Software Lab', type: 'Practical', prof: 'Dr. K. Bhat', note: 'Sprint 2 demo, groups of 4' }
+      ]},
+      { key: 'sat', d: 'Sat', date: 14, long: 'Saturday, 14 Nov', classes: [] }
+    ];
+
+    const toH = (s) => { const p = s.split(':').map(Number); return p[0] + p[1] / 60; };
+    const selKey = this.state.day;
+    const sel = WEEK.find((w) => w.key === selKey) || WEEK[0];
+    const isToday = sel.key === TODAY;
+
+    const days = WEEK.map((w) => {
+      const on = w.key === sel.key;
+      const today = w.key === TODAY;
+      return {
+        d: w.d, date: w.date, long: w.long + (today ? ', today' : ''),
+        pressed: on ? 'true' : 'false',
+        bg: on ? '#FFFFFF' : 'rgba(255,255,255,0.08)',
+        dayInk: on ? '#5B6577' : '#C9D2EC',
+        dateInk: on ? '#13235B' : '#FFFFFF',
+        dot: today ? (on ? '#2F5BEA' : '#FF8A65') : 'transparent',
+        pick: () => this.setState({ day: w.key })
+      };
+    });
+
+    const classes = sel.classes.map((c, i) => {
+      const s = toH(c.start), e = toH(c.end);
+      const past = isToday && e <= NOW;
+      const live = isToday && s <= NOW && NOW < e;
+      const t = past ? PAST : TYPE[c.type];
+      const key = sel.key + '|' + i;
+      const open = this.state.openNote === key;
+      const slotH = ((e - s) * HOUR - 4) + 'px';
+      return {
+        ...c,
+        name: COURSES[c.code],
+        time: c.start + '–' + c.end,
+        top: ((s - START) * HOUR + 2) + 'px',
+        // An open note lets the card grow past its slot, drawn above the next card
+        height: open ? 'auto' : slotH,
+        minH: slotH,
+        z: open ? 3 : 1,
+        shadow: open ? '0 10px 24px rgba(19,35,91,0.16)' : 'none',
+        bg: t.bg, tagBg: t.tagBg, fg: t.fg,
+        border: live ? '2px solid #2F5BEA' : t.border,
+        ink: past ? '#5B6577' : '#0E1726',
+        isLive: live,
+        hasNote: !!c.note,
+        noteOpen: open ? 'true' : 'false',
+        noteAria: (open ? 'Collapse note: ' : 'Show full note: ') + (c.note || ''),
+        noteWrap: open ? 'normal' : 'nowrap',
+        noteAlign: open ? 'flex-start' : 'center',
+        iconTop: open ? '2px' : '0',
+        chevron: open ? 'rotate(180deg)' : 'none',
+        toggleNote: () => this.setState({ openNote: open ? null : key })
+      };
+    });
+
+    const mins = sel.classes.reduce((sum, c) => sum + Math.round((toH(c.end) - toH(c.start)) * 60), 0);
+    const hh = Math.floor(mins / 60), mm = mins % 60;
+    const summary = sel.classes.length
+      ? sel.classes.length + (sel.classes.length === 1 ? ' class' : ' classes')
+      : 'No classes';
+
+    const hours = [];
+    for (let h = START; h <= END; h++) {
+      const label = h === 12 ? '12 PM' : (h > 12 ? (h - 12) + ' PM' : h + ' AM');
+      hours.push({ label, top: ((h - START) * HOUR - 7) + 'px' });
+    }
+
+    return {
+      days, sel, classes, hours, summary,
+      gridH: ((END - START) * HOUR + 8) + 'px',
+      hasClasses: classes.length > 0,
+      isEmpty: classes.length === 0,
+      showToday: !isToday,
+      goToday: () => this.setState({ day: TODAY }),
+      showNow: isToday,
+      nowTop: ((NOW - START) * HOUR - 6) + 'px',
+      nowLabel: '10:20',
+      showNav: !this.props.hideNav
+    };
+  }
+}
+</script>
+</body>
+</html>

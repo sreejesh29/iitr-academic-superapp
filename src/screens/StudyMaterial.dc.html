@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Campus app – Study material</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2448C9;text-decoration:none}a:hover{color:#16308F}
+button{font-family:inherit;cursor:pointer}
+input::placeholder{color:#C9D2EC}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.hs{scrollbar-width:none}.hs::-webkit-scrollbar{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</helmet>
+
+<div style="position: relative; width: 390px; min-height: {{minH}}; box-sizing: border-box; background: #F3F5FA; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #0E1726; display: flex; flex-direction: column; overflow-x: clip">
+
+  <!-- Header: solid navy, stays put -->
+  <header style="position: sticky; top: 0; z-index: 0; background: #13235B; padding: 16px 0 64px; display: flex; flex-direction: column; gap: 16px; color: #FFFFFF">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 16px">
+      <a href="{{backHref}}" aria-label="Back to Courses" style="width: 44px; height: 44px; border-radius: 14px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+      </a>
+      <div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0">
+        <h1 style="margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.3">Study material</h1>
+        <span style="font-size: 12px; color: #C9D2EC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{course.name}}&nbsp;</span>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div style="margin: 0 16px; display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 16px; border-radius: 14px; background: rgba(255,255,255,0.12)">
+      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C9D2EC" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+      <label for="sm-q" class="sr">Search study material</label>
+      <input id="sm-q" type="search" placeholder="Search files in {{course.code}}" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; color: #FFFFFF; font-family: inherit; font-size: 14px">
+    </div>
+
+    <!-- Course switcher -->
+    <div role="tablist" aria-label="Course" class="hs" style="display: flex; gap: 8px; overflow-x: auto; padding: 0 16px">
+      <sc-for list="{{courseTabs}}" as="c" hint-placeholder-count="6">
+        <button type="button" role="tab" aria-selected="{{c.selected}}" onClick="{{c.pick}}" style="flex-shrink: 0; height: 36px; padding: 0 14px; border-radius: 999px; border: 0; background: {{c.bg}}; color: {{c.fg}}; font-size: 13px; font-weight: 700">{{c.code}}</button>
+      </sc-for>
+    </div>
+  </header>
+
+  <!-- Content sheet -->
+  <div style="position: relative; z-index: 1; margin-top: -28px; flex: 1; background: #F3F5FA; border-radius: 28px 28px 0 0; padding: 10px 0 40px; box-shadow: 0 -10px 30px rgba(14,23,38,0.22); display: flex; flex-direction: column; gap: 16px">
+    <div aria-hidden="true" style="width: 40px; height: 5px; margin: 0 auto; border-radius: 3px; background: #C9D2EC"></div>
+
+    <!-- Filter by file type -->
+    <div role="group" aria-label="Filter by file type" class="hs" style="display: flex; gap: 8px; overflow-x: auto; padding: 0 16px">
+      <sc-for list="{{typeChips}}" as="f" hint-placeholder-count="6">
+        <button type="button" onClick="{{f.pick}}" aria-pressed="{{f.pressed}}" style="flex-shrink: 0; height: 34px; padding: 0 12px; border-radius: 999px; border: {{f.border}}; background: {{f.bg}}; color: {{f.fg}}; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px">
+          {{f.label}}
+          <span style="font-size: 12px; font-weight: 600; color: {{f.countFg}}">{{f.count}}</span>
+        </button>
+      </sc-for>
+    </div>
+
+    <div style="margin: 0 16px -8px; display: flex; align-items: center; gap: 8px; justify-content: flex-end">
+      
+      <button type="button" onClick="{{toggleSort}}" aria-label="{{sortAria}}" style="height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid #E3E7F0; background: #FFFFFF; color: #0E1726; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; justify-content: flex-end">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"></path></svg>
+        {{sortLabel}}
+      </button>
+    </div>
+
+    <sc-if value="{{noResults}}" hint-placeholder-val="{{false}}">
+      <p style="margin: 0 16px; padding: 20px 16px; border-radius: 20px; background: #FFFFFF; border: 1px solid #E3E7F0; font-size: 14px; color: #3A4456; text-align: center">No {{emptyType}} uploaded for this course yet.</p>
+    </sc-if>
+
+    <ul aria-label="Files" style="margin: 0 16px; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px">
+      <sc-for list="{{files}}" as="f" hint-placeholder-count="8">
+        <li style="background: #FFFFFF; border: 1px solid #E3E7F0; border-radius: 20px; padding: 14px; display: flex; flex-direction: column; gap: 12px">
+          <!-- Video gets a thumbnail strip -->
+          <sc-if value="{{f.isVideo}}" hint-placeholder-val="{{false}}">
+            <a href="#" aria-label="Play {{f.name}}" style="position: relative; height: 150px; border-radius: 14px; overflow: hidden; background: linear-gradient(135deg, #2448C9 0%, #13235B 70%); display: flex; align-items: center; justify-content: center">
+              <span aria-hidden="true" style="position: absolute; inset: 0; background: repeating-linear-gradient(135deg, rgba(255,255,255,0.04) 0 12px, transparent 12px 24px)"></span>
+              <span aria-hidden="true" style="position: relative; width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,0.95); color: #13235B; display: flex; align-items: center; justify-content: center">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"></path></svg>
+              </span>
+              <span style="position: absolute; right: 10px; bottom: 10px; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: rgba(14,23,38,0.75); color: #FFFFFF">{{f.duration}}</span>
+            </a>
+          </sc-if>
+          <!-- Image gets a small preview -->
+          <sc-if value="{{f.isImage}}" hint-placeholder-val="{{false}}">
+            <a href="#" aria-label="Open {{f.name}}" style="position: relative; height: 120px; border-radius: 14px; overflow: hidden; background: #F7F8FB; border: 1px solid #EDF0F6; display: flex; align-items: center; justify-content: center">
+              <svg aria-hidden="true" width="220" height="96" viewBox="0 0 220 96" fill="none">
+                <rect x="6" y="38" width="44" height="20" rx="6" fill="#DCE4FF" stroke="#2448C9" stroke-width="1.5"></rect>
+                <rect x="88" y="10" width="44" height="20" rx="6" fill="#C8F0D8" stroke="#067647" stroke-width="1.5"></rect>
+                <rect x="88" y="66" width="44" height="20" rx="6" fill="#C8F0D8" stroke="#067647" stroke-width="1.5"></rect>
+                <rect x="170" y="38" width="44" height="20" rx="6" fill="#FCE7B4" stroke="#8A4B00" stroke-width="1.5"></rect>
+                <path d="M50 48 88 20M50 48 88 76M132 20 170 48M132 76 170 48" stroke="#5B6577" stroke-width="1.5"></path>
+              </svg>
+            </a>
+          </sc-if>
+
+          <div style="display: flex; align-items: center; gap: 12px">
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
+              <!-- Title truncates; the New tag stays right after it, on the same line -->
+              <span style="display: flex; align-items: center; gap: 6px; min-width: 0">
+                <span title="{{f.name}}" style="min-width: 0; font-size: 14px; font-weight: 700; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{f.name}}</span>
+                <sc-if value="{{f.isNew}}" hint-placeholder-val="{{false}}">
+                  <span style="flex-shrink: 0; font-size: 10px; line-height: 15px; font-weight: 700; padding: 1px 6px; border-radius: 5px; background: #2F5BEA; color: #FFFFFF">New</span>
+                </sc-if>
+              </span>
+              <span style="font-size: 12px; color: #5B6577; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{f.meta}}</span>
+              <span style="font-size: 12px; color: #5B6577">{{f.date}}</span>
+            </span>
+            <button type="button" onClick="{{f.download}}" aria-label="{{f.dlAria}}" style="margin-right: -8px; width: 40px; height: 40px; flex-shrink: 0; border-radius: 12px; border: 0; background: transparent; color: {{f.dlFg}}; display: flex; align-items: center; justify-content: center">
+              <sc-if value="{{f.isIdle}}" hint-placeholder-val="{{true}}">
+                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg>
+              </sc-if>
+              <sc-if value="{{f.isLoading}}" hint-placeholder-val="{{false}}">
+                <span aria-hidden="true" style="width: 16px; height: 16px; box-sizing: border-box; border-radius: 50%; border: 2.5px solid #DCE4FF; border-top-color: #2448C9; animation: spin 0.8s linear infinite"></span>
+              </sc-if>
+              <sc-if value="{{f.isSaved}}" hint-placeholder-val="{{false}}">
+                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg>
+              </sc-if>
+            </button>
+          </div>
+        </li>
+      </sc-for>
+    </ul>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"course":{"editor":"enum","options":["CSN-341","CSN-343","CSN-345","CSN-361","MAN-301","HSN-351"],"default":"CSN-341"},"fileType":{"editor":"enum","options":["All","PDF","Slides","Docs","Images","Videos"],"default":"All"},"$preview":{"width":390,"height":1774}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { course: null, type: null, sort: 'newest', dl: {} };
+  }
+  renderVals() {
+    const S = this.state;
+    const P = this.props;
+
+    const KIND = {
+      pdf: { label: 'PDF',    ext: 'PDF', bg: '#FDE7E4', fg: '#B42318' },
+      ppt: { label: 'Slides', ext: 'PPT', bg: '#FFEAD5', fg: '#C4320A' },
+      doc: { label: 'Docs',   ext: 'DOC', bg: '#DCE4FF', fg: '#2448C9' },
+      img: { label: 'Images', ext: 'IMG', bg: '#E3F8EC', fg: '#067647' },
+      vid: { label: 'Videos', ext: 'MP4', bg: '#EDE9FE', fg: '#5B21B6' }
+    };
+
+    // [name, kind, topic, size, by, isTA, date, order (higher = newer), isNew, duration]
+    const COURSES = {
+      'CSN-341': { name: 'Computer Networks', profs: 'Prof. S. Iyer', files: [
+        ['Tutorial 6 – Routing.pdf', 'pdf', 'Tutorial 6 | slides & solutions', '1.8 MB', 'Rahul Verma', true, '8 Nov', 12, true],
+        ['L14 – TCP congestion control.pdf', 'pdf', 'Lecture 14', '2.4 MB', 'Prof. S. Iyer', false, '6 Nov', 11, true],
+        ['L13 – Transport layer.pptx', 'ppt', 'Lecture 13', '5.6 MB', 'Prof. S. Iyer', false, '4 Nov', 10],
+        ['Lab 5 – Wireshark walkthrough.mp4', 'vid', 'Lab 5 | screen recording', '148 MB', 'Rahul Verma', true, '3 Nov', 9, false, '12:40'],
+        ['Subnetting cheat sheet.png', 'img', 'Quick reference', '640 KB', 'Rahul Verma', true, '2 Nov', 8],
+        ['Midsem practice set.pdf', 'pdf', 'Mid-semester revision', '1.2 MB', 'Prof. S. Iyer', false, '2 Nov', 7],
+        ['L12 – UDP and sockets.pptx', 'ppt', 'Lecture 12', '4.2 MB', 'Prof. S. Iyer', false, '30 Oct', 6],
+        ['Guest lecture – Data centre networks.mp4', 'vid', 'Guest lecture recording', '620 MB', 'Prof. S. Iyer', false, '24 Oct', 5, false, '54:10'],
+        ['TCP congestion notes (RFC 5681).docx', 'doc', 'Reading notes', '96 KB', 'Rahul Verma', true, '18 Oct', 4],
+        ['Course handout & grading policy.docx', 'doc', 'Course information', '180 KB', 'Prof. S. Iyer', false, '28 Jul', 1]
+      ] },
+      'CSN-343': { name: 'Theory of Computation', profs: 'Prof. R. Menon', files: [
+        ['L11 – Pushdown automata.pdf', 'pdf', 'Lecture 11', '1.6 MB', 'Prof. R. Menon', false, '5 Nov', 5, true],
+        ['Pumping lemma worked examples.pdf', 'pdf', 'Tutorial 5', '900 KB', 'Prof. R. Menon', false, '29 Oct', 4],
+        ['CFG to PDA conversion.mp4', 'vid', 'Explainer video', '96 MB', 'Prof. R. Menon', false, '22 Oct', 3, false, '18:05'],
+        ['Course outline.docx', 'doc', 'Course information', '120 KB', 'Prof. R. Menon', false, '28 Jul', 1]
+      ] },
+      'CSN-345': { name: 'Software Engineering', profs: 'Dr. K. Bhat, Dr. A. Sharma', files: [
+        ['L10 – Requirements engineering.pptx', 'ppt', 'Lecture 10', '6.1 MB', 'Dr. K. Bhat', false, '3 Nov', 5, true],
+        ['IEEE 830 template.docx', 'doc', 'SRS template', '64 KB', 'Dr. K. Bhat', false, '20 Oct', 4],
+        ['Use-case diagram examples.png', 'img', 'Reference', '820 KB', 'Dr. A. Sharma', false, '15 Oct', 3],
+        ['Git workflow demo.mp4', 'vid', 'Lab recording', '210 MB', 'Dr. A. Sharma', false, '9 Oct', 2, false, '22:30']
+      ] },
+      'CSN-361': { name: 'Networks Lab', profs: 'Dr. N. Rao, Dr. P. Sen', files: [
+        ['Lab 6 manual – Socket programming.pdf', 'pdf', 'Lab 6', '1.1 MB', 'Dr. N. Rao', false, '6 Nov', 3, true],
+        ['Lab setup – Mininet.mp4', 'vid', 'Setup guide', '84 MB', 'Dr. P. Sen', false, '20 Oct', 2, false, '09:15'],
+        ['Lab rubric.docx', 'doc', 'Grading', '70 KB', 'Dr. N. Rao', false, '28 Jul', 1]
+      ] },
+      'MAN-301': { name: 'Probability & Statistics', profs: 'Dr. M. Kulkarni', files: [
+        ['L12 – Random variables.pdf', 'pdf', 'Lecture 12', '1.4 MB', 'Dr. M. Kulkarni', false, '4 Nov', 4, true],
+        ['Distributions summary.png', 'img', 'Quick reference', '540 KB', 'Dr. M. Kulkarni', false, '28 Oct', 3],
+        ['L11 – Conditional probability.pptx', 'ppt', 'Lecture 11', '3.3 MB', 'Dr. M. Kulkarni', false, '28 Oct', 2]
+      ] },
+      'HSN-351': { name: 'Management Techniques', profs: 'Prof. A. Ghosh', files: [
+        ['Toyota production case.pdf', 'pdf', 'Case reading', '2.2 MB', 'Prof. A. Ghosh', false, '30 Oct', 3],
+        ['L9 – Lean operations.pptx', 'ppt', 'Lecture 9', '4.8 MB', 'Prof. A. Ghosh', false, '28 Oct', 2],
+        ['Case analysis guide.docx', 'doc', 'How-to', '110 KB', 'Prof. A. Ghosh', false, '1 Aug', 1]
+      ] }
+    };
+    const CODES = Object.keys(COURSES);
+
+    const code = S.course || P.course || 'CSN-341';
+    const type = S.type || P.fileType || 'All';
+    const C = COURSES[code];
+
+    const all = C.files.map((f, i) => {
+      const k = KIND[f[1]];
+      const key = code + '|' + i;
+      const st = S.dl[key] || 'idle';
+      return {
+        name: f[0], kind: f[1], label: k.label, ext: k.ext, bg: k.bg, fg: k.fg,
+        // Title already names the class/topic, so the sub text is just length and size.
+        meta: (f[9] ? f[9] + ' | ' : '') + f[3],
+        by: f[4], isTA: !!f[5], date: f[6], order: f[7], isNew: !!f[8],
+        duration: f[9] || '',
+        isVideo: f[1] === 'vid', isImage: f[1] === 'img',
+        isIdle: st === 'idle', isLoading: st === 'loading', isSaved: st === 'saved',
+        dlAria: st === 'saved' ? 'Downloaded ' + f[0] : 'Download ' + f[0],
+        dlBg: st === 'saved' ? '#E3F8EC' : '#FFFFFF',
+        dlFg: st === 'saved' ? '#067647' : '#5B6577',
+        dlBorder: st === 'saved' ? '#C8F0D8' : '#E3E7F0',
+        download: () => {
+          if (st !== 'idle') return;
+          this.setState({ dl: { ...this.state.dl, [key]: 'loading' } });
+          setTimeout(() => this.setState({ dl: { ...this.state.dl, [key]: 'saved' } }), 1200);
+        }
+      };
+    });
+
+    const files = all
+      .filter((f) => type === 'All' || f.label === type)
+      .sort((a, b) => (S.sort === 'oldest' ? a.order - b.order : b.order - a.order));
+
+    const typeChips = ['All', 'PDF', 'Slides', 'Docs', 'Images', 'Videos'].map((t) => {
+      const on = t === type;
+      const n = t === 'All' ? all.length : all.filter((f) => f.label === t).length;
+      return {
+        label: t, count: n, pressed: on ? 'true' : 'false',
+        bg: on ? '#13235B' : '#FFFFFF', fg: on ? '#FFFFFF' : '#3A4456',
+        countFg: on ? '#C9D2EC' : '#8A93A6',
+        border: on ? '1px solid #13235B' : '1px solid #E3E7F0',
+        pick: () => this.setState({ type: t })
+      };
+    });
+
+    const courseTabs = CODES.map((c) => {
+      const on = c === code;
+      return {
+        code: c, selected: on ? 'true' : 'false',
+        bg: on ? '#FFFFFF' : 'rgba(255,255,255,0.12)', fg: on ? '#13235B' : '#FFFFFF',
+        pick: () => this.setState({ course: c, type: 'All' })
+      };
+    });
+
+    const newCount = all.filter((f) => f.isNew).length;
+    return {
+      course: { code, name: C.name, profs: C.profs },
+      courseTabs, typeChips, files,
+      countLabel: files.length + (files.length === 1 ? ' file' : ' files') + (type === 'All' && newCount ? ' | ' + newCount + ' new' : ''),
+      noResults: files.length === 0,
+      emptyType: type === 'All' ? 'files' : type.toLowerCase(),
+      sortLabel: S.sort === 'oldest' ? 'Oldest first' : 'Newest first',
+      sortAria: 'Sorted ' + (S.sort === 'oldest' ? 'oldest first' : 'newest first') + '. Tap to reverse.',
+      toggleSort: () => this.setState({ sort: S.sort === 'oldest' ? 'newest' : 'oldest' }),
+      backHref: P.backHref || 'Courses.dc.html',
+      minH: P.minH || '844px'
+    };
+  }
+}
+</script>
+</body>
+</html>

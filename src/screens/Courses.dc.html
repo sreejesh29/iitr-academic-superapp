@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Campus app – Courses</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2448C9;text-decoration:none}a:hover{color:#16308F}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+
+<div style="position: relative; width: 390px; min-height: 844px; box-sizing: border-box; background: #F3F5FA; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #0E1726; display: flex; flex-direction: column; overflow-x: clip">
+
+  <!-- Header: solid navy, stays put while the sheet scrolls over it -->
+  <header style="position: sticky; top: 0; z-index: 0; background: #13235B; padding: 24px 20px 64px; display: flex; flex-direction: column; gap: 20px; color: #FFFFFF">
+    <div style="display: flex; align-items: center; gap: 2px">
+      <div style="display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; padding-right: 8px">
+        <h1 style="margin: 0; font-size: 21px; font-weight: 700; letter-spacing: -0.3px">Courses</h1>
+        <span style="font-size: 12px; color: #C9D2EC">Autumn semester 2026 | Sem 5</span>
+      </div>
+      <a href="IdCard.dc.html" aria-label="Open digital ID card" style="width: 44px; height: 44px; border-radius: 14px; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2.5"></rect><circle cx="8" cy="11" r="2"></circle><path d="M5 16a3 3 0 0 1 6 0M14 10h5M14 14h3"></path></svg>
+      </a>
+      <a href="Notifications.dc.html" aria-label="Notifications, 3 unread" style="position: relative; width: 44px; height: 44px; border-radius: 14px; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+        <span aria-hidden="true" style="position: absolute; top: 10px; right: 11px; width: 8px; height: 8px; border-radius: 50%; background: #FF8A65; box-shadow: 0 0 0 2px #13235B"></span>
+      </a>
+      <a href="Profile.dc.html" aria-label="Profile" style="width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center"><span style="position: relative; display: block; width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; overflow: hidden; background: #DCE4FF; box-shadow: 0 0 0 2px #FFFFFF;"><img src="/_blob/d380e2b78f28a976382d51f88b9181ac" alt="" style="position: absolute; left: -205%; top: -46%; height: 300%; width: auto; max-width: none"></span></a>
+    </div>
+
+    <!-- Semester summary -->
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+      <div style="padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.12); display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 12px; color: #C9D2EC">Courses</span><span style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px">{{totals.courses}}</span>
+        
+      </div>
+      <div style="padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.12); display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 12px; color: #C9D2EC">Credits</span><span style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px">{{totals.credits}}</span>
+        
+      </div>
+      <div style="padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.12); display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 12px; color: #C9D2EC">Attendance</span><span style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px">{{totals.attendance}}%</span>
+        
+      </div>
+    </div>
+  </header>
+
+  <!-- Content sheet -->
+  <div style="position: relative; z-index: 1; margin-top: -28px; flex: 1; background: #F3F5FA; border-radius: 28px 28px 0 0; padding: 10px 0 120px; box-shadow: 0 -10px 30px rgba(14,23,38,0.22); height: 2842px">
+    <div aria-hidden="true" style="width: 40px; height: 5px; margin: 0 auto; border-radius: 3px; background: #C9D2EC"></div>
+
+    <section aria-labelledby="crs-h" style="margin: 18px 16px 0; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <h2 id="crs-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Enrolled courses</h2>
+        <span style="font-size: 13px; color: #5B6577">{{totals.courses}} courses this semester</span>
+      </div>
+
+      <sc-for list="{{courses}}" as="c" hint-placeholder-count="6">
+        <article aria-label="{{c.code}} {{c.name}}" style="background: #FFFFFF; border: 1px solid #E3E7F0; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+
+          <!-- 1. Identity -->
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.3px; color: #5B6577">{{c.code}}</span>
+            <h3 style="margin: 0; font-size: 17px; font-weight: 700; line-height: 1.3; letter-spacing: -0.2px">{{c.name}}</h3>
+            <span style="display: flex; align-items: flex-start; gap: 6px; font-size: 13px; line-height: 1.4; color: #3A4456">
+              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>
+              {{c.profs}}
+            </span>
+          </div>
+
+          <!-- 2. Key figures: credits, attendance, L·T·P -->
+          <dl style="margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 12px 0; border-top: 1px solid #EDF0F6; border-bottom: 1px solid #EDF0F6">
+            <div style="display: flex; flex-direction: column; gap: 4px; padding-right: 12px">
+              <dt style="font-size: 12px; font-weight: 600; color: #5B6577">Credits</dt>
+              <dd style="margin: 0; font-size: 24px; line-height: 1.1; font-weight: 800; letter-spacing: -0.5px; color: #13235B">{{c.credits}}</dd>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px; padding: 0 12px; border-left: 1px solid #EDF0F6">
+              <dt style="font-size: 12px; font-weight: 600; color: #5B6577">Attendance</dt>
+              <dd style="margin: 0; font-size: 24px; line-height: 1.1; font-weight: 800; letter-spacing: -0.5px; color: {{c.attInk}}">{{c.att}}%</dd>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px; padding-left: 12px; border-left: 1px solid #EDF0F6">
+              <dt style="font-size: 12px; font-weight: 600; color: #5B6577">L-T-P</dt>
+              <dd style="margin: 0; font-size: 24px; line-height: 1.1; font-weight: 800; letter-spacing: -0.5px; color: #13235B">{{c.ltp}}</dd>
+            </div>
+          </dl>
+
+          <sc-if value="{{c.low}}" hint-placeholder-val="{{false}}">
+            <p style="margin: 0; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; background: #FFF4DB; font-size: 13px; font-weight: 600; color: #4A2800">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A4B00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path><path d="M12 9v4M12 17h.01"></path></svg>
+              {{c.lowMsg}}
+            </p>
+          </sc-if>
+
+          <!-- 3. Weekly schedule -->
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <h4 style="margin: 0; font-size: 13px; font-weight: 700; color: #0E1726">Weekly schedule</h4>
+            <!-- Same row style as the TA sessions on Profile: top-aligned day, no background, dividers -->
+            <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column">
+              <sc-for list="{{c.slots}}" as="s" hint-placeholder-count="3">
+                <li style="display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-top: 1px solid #EDF0F6">
+                  <span style="width: 76px; flex-shrink: 0; margin-top: 2px; font-size: 12px; font-weight: 700; color: #2448C9">{{s.dayLong}}</span>
+                  <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                    <span style="font-size: 14px; font-weight: 600; color: #0E1726">{{s.time}}</span>
+                    <span style="font-size: 12px; color: #5B6577">{{s.room}}</span>
+                  </span>
+                  <span style="flex-shrink: 0; margin-top: 1px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: {{s.tagBg}}; color: {{s.tagFg}}">{{s.type}}</span>
+                </li>
+              </sc-for>
+            </ul>
+          </div>
+
+          <!-- 4. Course resources -->
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+            <a href="{{smHref}}" aria-label="Study material for {{c.code}}" style="height: 44px; border-radius: 12px; background: #13235B; color: #FFFFFF; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 700">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"></path><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"></path></svg>
+              Study material
+            </a>
+            <a href="{{asgHref}}" aria-label="{{c.asgLabel}}" style="height: 44px; border-radius: 12px; background: #13235B; color: #FFFFFF; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 700">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M9 3h6v3H9zM9 11h6M9 15h4"></path></svg>
+              Assignments
+              <sc-if value="{{c.hasPending}}" hint-placeholder-val="{{false}}">
+                <span aria-hidden="true" style="min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 6px; background: #D92D20; color: #FFFFFF; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{c.pending}}</span>
+              </sc-if>
+            </a>
+          </div>
+        </article>
+      </sc-for>
+    </section>
+  </div>
+
+  <!-- Floating bottom nav (hidden when a phone frame draws its own fixed copy) -->
+  <sc-if value="{{showNav}}" hint-placeholder-val="{{true}}">
+  <nav aria-label="Main" style="position: absolute; z-index: 10; left: 16px; right: 16px; bottom: 28px; height: 68px; box-sizing: border-box; padding: 8px; border-radius: 999px; background: #13235B; box-shadow: 0 12px 28px rgba(19,35,91,0.30); display: flex; align-items: center; justify-content: space-between">
+    <a href="Main.dc.html" aria-label="Home" style="width: 52px; height: 52px; border-radius: 50%; color: #C9D2EC; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>
+    </a>
+    <a href="Timetable.dc.html" aria-label="Timetable" style="width: 52px; height: 52px; border-radius: 50%; color: #C9D2EC; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2.5"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+    </a>
+    <a href="#" aria-current="page" style="height: 52px; padding: 0 16px; border-radius: 999px; background: #FFFFFF; color: #13235B; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700">
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"></path><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"></path></svg>
+      Courses
+    </a>
+    <a href="Chats.dc.html" aria-label="Chats, 12 unread" style="position: relative; width: 52px; height: 52px; border-radius: 50%; color: #C9D2EC; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      <span aria-hidden="true" style="position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; border-radius: 50%; background: #FF8A65; box-shadow: 0 0 0 2px #13235B"></span>
+    </a>
+    <a href="Collab.dc.html" aria-label="Collaboration" style="width: 52px; height: 52px; border-radius: 50%; color: #C9D2EC; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+    </a>
+  </nav>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":3151}}'>
+class Component extends DCLogic {
+  renderVals() {
+    // Slots match the weekly Timetable. L/T/P = contact hours per week.
+    const RAW = [
+      { code: 'CSN-341', name: 'Computer Networks', profs: 'Prof. S. Iyer', credits: 3, att: 88, l: 3, t: 0, p: 0, slots: [
+        ['Mon', '09:00–09:55', 'LHC 102', 'Lecture'], ['Wed', '09:00–09:55', 'LHC 102', 'Lecture'], ['Thu', '11:00–11:55', 'LHC 102', 'Lecture'] ] },
+      { code: 'CSN-343', name: 'Theory of Computation', profs: 'Prof. R. Menon', credits: 3, att: 89, l: 2, t: 1, p: 0, slots: [
+        ['Tue', '08:00–08:55', 'LHC 103', 'Lecture'], ['Wed', '10:00–10:55', 'LHC 103', 'Tutorial'], ['Fri', '09:00–09:55', 'LHC 103', 'Lecture'] ] },
+      { code: 'CSN-345', name: 'Software Engineering', profs: 'Dr. K. Bhat, Dr. A. Sharma', credits: 4, att: 85, l: 2, t: 1, p: 3, slots: [
+        ['Tue', '09:00–09:55', 'LHC 201', 'Lecture'], ['Tue', '15:00–15:55', 'CSE 105', 'Tutorial'], ['Thu', '08:00–08:55', 'LHC 201', 'Lecture'], ['Fri', '14:00–16:55', 'Software Lab', 'Practical'] ] },
+      { code: 'CSN-361', name: 'Networks Lab', profs: 'Dr. N. Rao, Dr. P. Sen', credits: 2, att: 79, l: 0, t: 0, p: 3, slots: [
+        ['Mon', '14:00–16:55', 'CSE Lab 2', 'Practical'] ] },
+      { code: 'MAN-301', name: 'Probability & Statistics', profs: 'Dr. M. Kulkarni', credits: 3, att: 71, l: 2, t: 1, p: 0, need: 2, slots: [
+        ['Mon', '10:00–10:55', 'LHC 204', 'Tutorial'], ['Tue', '11:00–11:55', 'LHC 204', 'Lecture'], ['Thu', '10:00–10:55', 'LHC 204', 'Lecture'] ] },
+      { code: 'HSN-351', name: 'Management Techniques', profs: 'Prof. A. Ghosh', credits: 3, att: 80, l: 3, t: 0, p: 0, slots: [
+        ['Mon', '12:00–12:55', 'LHC 008', 'Lecture'], ['Wed', '12:00–12:55', 'LHC 008', 'Lecture'], ['Fri', '11:00–11:55', 'LHC 008', 'Lecture'] ] }
+    ];
+    const TAG = {
+      Lecture:   { bg: '#DCE4FF', fg: '#2448C9' },
+      Tutorial:  { bg: '#FCE7B4', fg: '#8A4B00' },
+      Practical: { bg: '#C8F0D8', fg: '#067647' }
+    };
+    const DAY_LONG = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday' };
+    const PENDING = { 'CSN-341': 1, 'MAN-301': 1, 'HSN-351': 1 };
+    const FREQ = ['', 'Once a week', 'Twice a week', '3 times a week', '4 times a week', '5 times a week'];
+
+    const courses = RAW.map((c) => {
+      const low = c.att < 75;
+      const dayCount = c.slots.map((s) => s[0]).filter((d, i, a) => a.indexOf(d) === i).length;
+      return {
+        ...c,
+        ltp: c.l + '-' + c.t + '-' + c.p,
+        // Pending assignments match Home: CSN-341, MAN-301 and HSN-351 have one each.
+        pending: PENDING[c.code] || 0,
+        hasPending: !!PENDING[c.code],
+        asgLabel: 'Assignments for ' + c.code + (PENDING[c.code] ? ', ' + PENDING[c.code] + ' pending' : ''),
+        low,
+        lowMsg: 'Below 75%. Attend the next ' + (c.need || 1) + ' classes to cross it.',
+        attInk: low ? '#B42318' : '#067647',
+        attFill: low ? '#D92D20' : '#12893F',
+        attW: c.att + '%',
+        freq: (FREQ[c.slots.length] || c.slots.length + ' times a week') + (dayCount < c.slots.length ? ' | ' + dayCount + ' days' : ''),
+        slots: c.slots.map((s) => ({ day: s[0], dayLong: DAY_LONG[s[0]], time: s[1], room: s[2], type: s[3], tagBg: TAG[s[3]].bg, tagFg: TAG[s[3]].fg }))
+      };
+    });
+
+    const credits = RAW.reduce((s, c) => s + c.credits, 0);
+    const totals = {
+      courses: RAW.length,
+      credits,
+      attendance: Math.round(RAW.reduce((s, c) => s + c.att * c.credits, 0) / credits)
+    };
+
+    return { courses, totals, showNav: !this.props.hideNav, smHref: this.props.smHref || 'StudyMaterial.dc.html', asgHref: this.props.asgHref || 'AssignmentsByCourse.dc.html' };
+  }
+}
+</script>
+</body>
+</html>

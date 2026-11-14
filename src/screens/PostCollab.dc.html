@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Campus app – Post a collaboration</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2448C9;text-decoration:none}a:hover{color:#16308F}
+button{font-family:inherit;cursor:pointer}
+input::placeholder,textarea::placeholder{color:#8A93A6}
+</style>
+</helmet>
+
+<div style="position: relative; width: 390px; min-height: {{minH}}; box-sizing: border-box; background: #F3F5FA; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #0E1726; display: flex; flex-direction: column; overflow-x: clip">
+
+  <!-- Header: solid navy, stays put -->
+  <header style="position: sticky; top: 0; z-index: 0; background: #13235B; padding: 16px 16px 64px; display: flex; flex-direction: column; gap: 16px; color: #FFFFFF">
+    <div style="display: flex; align-items: center; gap: 8px">
+      <a href="{{backHref}}" aria-label="Back to collaboration" style="width: 44px; height: 44px; border-radius: 14px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+      </a>
+      <div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0">
+        <h1 style="margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.2px">Post a collaboration</h1>
+        <span style="font-size: 12px; color: #C9D2EC">Find teammates for your project</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content sheet -->
+  <div style="position: relative; z-index: 1; margin-top: -28px; flex: 1; background: #F3F5FA; border-radius: 28px 28px 0 0; padding: 10px 16px 40px; box-shadow: 0 -10px 30px rgba(14,23,38,0.22); display: flex; flex-direction: column; gap: 20px">
+    <div aria-hidden="true" style="width: 40px; height: 5px; margin: 0 auto -6px; border-radius: 3px; background: #C9D2EC"></div>
+
+    <!-- ===== FORM ===== -->
+    <sc-if value="{{isForm}}" hint-placeholder-val="{{true}}">
+      <div style="display: flex; flex-direction: column; gap: 20px">
+
+        <!-- Type -->
+        <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 10px">
+          <legend style="padding: 0; margin-bottom: 10px; font-size: 14px; font-weight: 700">Type</legend>
+          <div role="radiogroup" aria-label="Collaboration type" style="display: flex; flex-wrap: wrap; gap: 8px">
+            <sc-for list="{{types}}" as="t" hint-placeholder-count="5">
+              <button type="button" role="radio" aria-checked="{{t.checked}}" onClick="{{t.pick}}" style="height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid {{t.border}}; background: {{t.bg}}; color: {{t.fg}}; font-size: 13px; font-weight: 700">{{t.label}}</button>
+            </sc-for>
+          </div>
+        </fieldset>
+
+        <!-- Title -->
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <label for="pc-title" style="font-size: 14px; font-weight: 700">Title</label>
+          <input id="pc-title" type="text" maxLength="80" value="{{title}}" onChange="{{onTitle}}" placeholder="e.g. Smart irrigation for campus gardens" style="height: 52px; box-sizing: border-box; padding: 0 14px; border-radius: 14px; border: 1.5px solid #E3E7F0; background: #FFFFFF; color: #0E1726; font-family: inherit; font-size: 15px; font-weight: 600; outline: none">
+          <span style="align-self: flex-end; font-size: 12px; color: #5B6577">{{titleCount}}/80</span>
+        </div>
+
+        <!-- Description -->
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <label for="pc-desc" style="font-size: 14px; font-weight: 700">What’s it about?</label>
+          <textarea id="pc-desc" rows="5" maxLength="500" value="{{desc}}" onChange="{{onDesc}}" placeholder="Describe the project, what you’ve done so far and what teammates will work on" style="box-sizing: border-box; padding: 12px 14px; border-radius: 14px; border: 1.5px solid #E3E7F0; background: #FFFFFF; color: #0E1726; font-family: inherit; font-size: 14px; line-height: 1.5; resize: vertical; outline: none"></textarea>
+          <span style="align-self: flex-end; font-size: 12px; color: #5B6577">{{descCount}}/500</span>
+        </div>
+
+        <!-- Skills -->
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <label for="pc-skill" style="font-size: 14px; font-weight: 700">Skills you’re looking for</label>
+          <div style="display: flex; gap: 8px">
+            <input id="pc-skill" type="text" value="{{skillDraft}}" onChange="{{onSkill}}" placeholder="Type a skill" style="flex: 1; min-width: 0; height: 48px; box-sizing: border-box; padding: 0 14px; border-radius: 14px; border: 1.5px solid #E3E7F0; background: #FFFFFF; color: #0E1726; font-family: inherit; font-size: 14px; font-weight: 600; outline: none">
+            <button type="button" onClick="{{addSkill}}" style="flex-shrink: 0; height: 48px; padding: 0 16px; border-radius: 14px; border: 0; background: #13235B; color: #FFFFFF; font-size: 14px; font-weight: 700">Add</button>
+          </div>
+          <sc-if value="{{hasSkills}}" hint-placeholder-val="{{true}}">
+            <ul aria-label="Added skills" style="margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px">
+              <sc-for list="{{skills}}" as="s" hint-placeholder-count="3">
+                <li style="display: flex; align-items: center; gap: 2px; height: 32px; padding: 0 4px 0 10px; border-radius: 8px; background: #EEF2FF; color: #2448C9; font-size: 13px; font-weight: 700">
+                  {{s.label}}
+                  <button type="button" onClick="{{s.remove}}" aria-label="Remove {{s.label}}" style="width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; color: #2448C9; display: flex; align-items: center; justify-content: center">
+                    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+                  </button>
+                </li>
+              </sc-for>
+            </ul>
+          </sc-if>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 12px; font-weight: 600; color: #5B6577">Suggestions</span>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px">
+              <sc-for list="{{suggestions}}" as="g" hint-placeholder-count="5">
+                <button type="button" onClick="{{g.add}}" aria-label="Add {{g.label}}" style="height: 32px; padding: 0 10px; border-radius: 999px; border: 1px dashed #C9D2EC; background: #FFFFFF; color: #3A4456; font-size: 12px; font-weight: 600">+ {{g.label}}</button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <!-- Spots + deadline -->
+        <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px">
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <span id="pc-spots-l" style="font-size: 14px; font-weight: 700">Teammates needed</span>
+            <div role="group" aria-labelledby="pc-spots-l" style="height: 52px; box-sizing: border-box; padding: 0 4px; border-radius: 14px; border: 1.5px solid #E3E7F0; background: #FFFFFF; display: flex; align-items: center; justify-content: space-between">
+              <button type="button" onClick="{{dec}}" aria-label="Fewer teammates" style="width: 44px; height: 44px; border: 0; border-radius: 10px; background: transparent; color: #13235B; font-size: 22px; font-weight: 700">−</button>
+              <span aria-live="polite" style="font-size: 17px; font-weight: 800">{{spots}}</span>
+              <button type="button" onClick="{{inc}}" aria-label="More teammates" style="width: 44px; height: 44px; border: 0; border-radius: 10px; background: transparent; color: #13235B; font-size: 22px; font-weight: 700">+</button>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <label for="pc-date" style="font-size: 14px; font-weight: 700">Apply by</label>
+            <input id="pc-date" type="date" value="{{deadline}}" onChange="{{onDate}}" style="height: 52px; box-sizing: border-box; padding: 0 12px; border-radius: 14px; border: 1.5px solid #E3E7F0; background: #FFFFFF; color: #0E1726; font-family: inherit; font-size: 14px; font-weight: 600; outline: none">
+          </div>
+        </div>
+
+        <p style="margin: 0; display: flex; align-items: flex-start; gap: 8px; padding: 12px 14px; border-radius: 14px; background: #EEF2FF; font-size: 13px; line-height: 1.5; color: #13235B">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2448C9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8h.01M11 12h1v4h1"></path></svg>
+          Students who are interested share their profile with you. You’ll find them under Your posts.
+        </p>
+
+        <button type="button" onClick="{{submit}}" style="height: 52px; border-radius: 14px; border: 0; background: #13235B; color: #FFFFFF; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"></path></svg>
+          Post collaboration
+        </button>
+      </div>
+    </sc-if>
+
+    <!-- ===== POSTED ===== -->
+    <sc-if value="{{isDone}}" hint-placeholder-val="{{false}}">
+      <div role="status" style="padding-top: 24px; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center">
+        <span aria-hidden="true" style="width: 72px; height: 72px; border-radius: 50%; background: #E3F8EC; color: #067647; display: flex; align-items: center; justify-content: center">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg>
+        </span>
+        <h2 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.3px">Your post is live</h2>
+        <span style="font-size: 14px; line-height: 1.5; color: #5B6577">Students can now see it in Open opportunities. We’ll notify you when someone shares their profile.</span>
+
+        <!-- Summary of what was posted -->
+        <article style="align-self: stretch; margin-top: 4px; background: #FFFFFF; border: 1px solid #E3E7F0; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 10px; text-align: left">
+          <span style="align-self: flex-start; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: {{typeBg}}; color: {{typeFg}}">{{typeLabel}}</span>
+          <h3 style="margin: 0; font-size: 17px; font-weight: 700; line-height: 1.3">{{shownTitle}}</h3>
+          <span style="font-size: 13px; color: #3A4456">{{spots}} {{spotWord}} | Apply by {{deadlineLabel}}</span>
+        </article>
+
+        <a href="{{postsHref}}" style="align-self: stretch; margin-top: 4px; height: 52px; border-radius: 14px; background: #13235B; color: #FFFFFF; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center">View your posts</a>
+        <a href="{{doneHref}}" style="padding: 6px 0; font-size: 14px; font-weight: 700">Back to collaboration</a>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"enum","options":["form","done"],"default":"form"},"$preview":{"width":390,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const done = props.step === 'done';
+    this.state = {
+      step: props.step || 'form',
+      type: 'Project',
+      title: done ? 'Mess feedback app for hostels' : '',
+      desc: '',
+      skillDraft: '',
+      skills: ['React Native', 'UI design'],
+      spots: 3,
+      deadline: '2026-11-25'
+    };
+  }
+  renderVals() {
+    const S = this.state;
+    const TYPE = {
+      Project:   ['#DCE4FF', '#2448C9'],
+      Research:  ['#C8F0D8', '#067647'],
+      Hackathon: ['#FCE7B4', '#8A4B00'],
+      Startup:   ['#FCE7F3', '#9D174D'],
+      Others:    ['#EDF0F6', '#3A4456']
+    };
+    const types = Object.keys(TYPE).map((t) => {
+      const on = S.type === t;
+      return {
+        label: t, checked: on ? 'true' : 'false',
+        bg: on ? '#13235B' : '#FFFFFF', fg: on ? '#FFFFFF' : '#3A4456',
+        border: on ? '#13235B' : '#DDE2EE',
+        pick: () => this.setState({ type: t })
+      };
+    });
+    const addSkill = (raw) => {
+      const v = String(raw || '').trim();
+      if (!v || this.state.skills.some((s) => s.toLowerCase() === v.toLowerCase())) return;
+      this.setState({ skills: [...this.state.skills, v], skillDraft: '' });
+    };
+    const POOL = ['Python', 'Figma', 'Firebase', 'Machine learning', 'Embedded C', 'Data analysis', 'Public speaking'];
+    const suggestions = POOL
+      .filter((p) => !S.skills.some((s) => s.toLowerCase() === p.toLowerCase()))
+      .slice(0, 5)
+      .map((label) => ({ label, add: () => addSkill(label) }));
+
+    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const d = (S.deadline || '').split('-');
+    const deadlineLabel = d.length === 3 ? Number(d[2]) + ' ' + MONTHS[Number(d[1]) - 1] : 'no deadline';
+
+    return {
+      isForm: S.step === 'form',
+      isDone: S.step === 'done',
+      types,
+      title: S.title, titleCount: S.title.length,
+      onTitle: (e) => this.setState({ title: e.target.value }),
+      desc: S.desc, descCount: S.desc.length,
+      onDesc: (e) => this.setState({ desc: e.target.value }),
+      skillDraft: S.skillDraft,
+      onSkill: (e) => this.setState({ skillDraft: e.target.value }),
+      addSkill: () => addSkill(S.skillDraft),
+      hasSkills: S.skills.length > 0,
+      skills: S.skills.map((label) => ({ label, remove: () => this.setState({ skills: this.state.skills.filter((x) => x !== label) }) })),
+      suggestions,
+      spots: S.spots,
+      spotWord: S.spots === 1 ? 'teammate needed' : 'teammates needed',
+      dec: () => this.setState({ spots: Math.max(1, S.spots - 1) }),
+      inc: () => this.setState({ spots: Math.min(10, S.spots + 1) }),
+      deadline: S.deadline,
+      onDate: (e) => this.setState({ deadline: e.target.value }),
+      deadlineLabel,
+      // Prototype: dummy data, so any input posts
+      submit: () => this.setState({ step: 'done' }),
+      typeLabel: S.type, typeBg: TYPE[S.type][0], typeFg: TYPE[S.type][1],
+      shownTitle: S.title.trim() || 'Untitled collaboration',
+      backHref: this.props.backHref || 'Collab.dc.html',
+      doneHref: this.props.doneHref || 'Collab.dc.html',
+      postsHref: this.props.postsHref || 'MyPosts.dc.html',
+      minH: this.props.minH || '844px'
+    };
+  }
+}
+</script>
+</body>
+</html>

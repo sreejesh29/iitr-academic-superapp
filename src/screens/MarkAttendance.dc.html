@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Campus app – Mark attendance</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2448C9;text-decoration:none}a:hover{color:#16308F}
+button{font-family:inherit;cursor:pointer}
+@keyframes pushIn{from{transform:translateY(-120%);opacity:0}to{transform:none;opacity:1}}
+@keyframes livePulse{0%{box-shadow:0 0 0 0 rgba(18,137,63,0.45)}70%{box-shadow:0 0 0 8px rgba(18,137,63,0)}100%{box-shadow:0 0 0 0 rgba(18,137,63,0)}}
+@keyframes waitPulse{0%,100%{opacity:1}50%{opacity:0.35}}
+</style>
+</helmet>
+
+<div style="position: relative; width: 390px; min-height: {{minH}}; box-sizing: border-box; background: #F3F5FA; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #0E1726; display: flex; flex-direction: column; overflow-x: clip">
+
+  <!-- Push notification: shown when the professor opens or closes the portal -->
+  <sc-if value="{{push.show}}" hint-placeholder-val="{{false}}">
+    <div style="position: sticky; top: 0; z-index: 20; height: 0; overflow: visible">
+      <div role="status" aria-live="polite" onClick="{{push.tap}}" style="position: absolute; top: 8px; left: 10px; right: 10px; box-sizing: border-box; padding: 12px 14px; border-radius: 22px; background: rgba(255,255,255,0.97); box-shadow: 0 16px 40px rgba(14,23,38,0.28), 0 0 0 1px rgba(14,23,38,0.06); display: flex; gap: 12px; cursor: pointer; animation: pushIn 0.45s cubic-bezier(.2,.9,.3,1.2)">
+        <span aria-hidden="true" style="width: 38px; height: 38px; flex-shrink: 0; border-radius: 10px; background: {{push.iconBg}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+          <sc-if value="{{push.isOpen}}" hint-placeholder-val="{{true}}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 7.5-2"></path></svg>
+          </sc-if>
+          <sc-if value="{{push.isClosed}}" hint-placeholder-val="{{false}}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+          </sc-if>
+        </span>
+        <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+          <span style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+            <span style="font-size: 12px; font-weight: 600; color: #5B6577">IITR Campus</span>
+            <span style="font-size: 12px; color: #5B6577">now</span>
+          </span>
+          <span style="font-size: 14px; font-weight: 700; color: #0E1726">{{push.title}}</span>
+          <span style="font-size: 13px; line-height: 1.4; color: #3A4456">{{push.body}}</span>
+        </span>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- Header: solid navy, stays put -->
+  <header style="position: sticky; top: 0; z-index: 0; background: #13235B; padding: 16px 16px 64px; display: flex; flex-direction: column; gap: 16px; color: #FFFFFF">
+    <div style="display: flex; align-items: center; gap: 8px">
+      <a href="{{backHref}}" aria-label="Back to Home" style="width: 44px; height: 44px; border-radius: 14px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+      </a>
+      <div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0">
+        <h1 style="margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.3">Attendance</h1>
+        <span style="font-size: 12px; color: #C9D2EC">Monday, 9 Nov&nbsp;</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content sheet -->
+  <div style="position: relative; z-index: 1; margin-top: -28px; flex: 1; background: #F3F5FA; border-radius: 28px 28px 0 0; padding: 10px 16px 40px; box-shadow: 0 -10px 30px rgba(14,23,38,0.22); display: flex; flex-direction: column; gap: 28px">
+    <div aria-hidden="true" style="width: 40px; height: 5px; margin: 0 auto -18px; border-radius: 3px; background: #C9D2EC"></div>
+
+    <!-- 1. Pick the course -->
+    <section aria-labelledby="pick-h" style="display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <h2 id="pick-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Select course</h2>
+        <span style="font-size: 13px; color: #5B6577">Today’s classes</span>
+      </div>
+      <div role="radiogroup" aria-labelledby="pick-h" style="display: flex; flex-direction: column; gap: 8px">
+        <sc-for list="{{courses}}" as="c" hint-placeholder-count="4">
+          <button type="button" role="radio" aria-checked="{{c.checked}}" disabled="{{c.disabled}}" onClick="{{c.pick}}" style="display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 16px; border: {{c.border}}; background: {{c.bg}}; text-align: left; color: #0E1726; cursor: {{c.cursor}}">
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
+              <span style="display: flex; align-items: center; gap: 8px">
+                <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.3px; color: #5B6577">{{c.code}}</span>
+                <sc-if value="{{c.hasTag}}" hint-placeholder-val="{{true}}">
+                  <span style="font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: {{c.tagBg}}; color: {{c.tagFg}}">{{c.tag}}</span>
+                </sc-if>
+              </span>
+              <span style="font-size: 15px; font-weight: 700; color: {{c.ink}}">{{c.name}}</span>
+              <span style="font-size: 12px; color: #5B6577">{{c.meta}}</span>
+            </span>
+            <span aria-hidden="true" style="width: 22px; height: 22px; flex-shrink: 0; box-sizing: border-box; border-radius: 50%; border: {{c.dotBorder}}; background: {{c.dotBg}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+              <sc-if value="{{c.isDone}}" hint-placeholder-val="{{false}}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg>
+              </sc-if>
+              <sc-if value="{{c.isOn}}" hint-placeholder-val="{{false}}">
+                <span style="width: 10px; height: 10px; border-radius: 50%; background: #13235B"></span>
+              </sc-if>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+    </section>
+
+    <!-- 2. Portal for the selected course (hidden until a course is picked) -->
+    <sc-if value="{{hasPortal}}" hint-placeholder-val="{{true}}">
+    <section aria-labelledby="portal-h" style="display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+        <h2 id="portal-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Attendance portal</h2>
+        <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 6px; background: {{p.chipBg}}; color: {{p.chipFg}}">
+          <span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: {{p.dot}}; animation: {{p.dotAnim}}"></span>
+          {{p.chip}}
+        </span>
+      </div>
+
+      <article style="background: #FFFFFF; border: 1px solid #E3E7F0; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.3px; color: #5B6577">{{sel.code}} | {{sel.room}}</span>
+          <h3 style="margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.3">{{sel.name}}</h3>
+          <span style="font-size: 13px; color: #3A4456">{{sel.prof}}</span>
+        </div>
+
+        <!-- Waiting -->
+        <sc-if value="{{p.isWaiting}}" hint-placeholder-val="{{true}}">
+          <div style="display: flex; gap: 12px; padding: 14px; border-radius: 14px; background: #F7F8FB">
+            <span aria-hidden="true" style="width: 40px; height: 40px; flex-shrink: 0; border-radius: 12px; background: #EDF0F6; color: #3A4456; display: flex; align-items: center; justify-content: center; animation: waitPulse 1.8s ease-in-out infinite">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+            </span>
+            <span style="display: flex; flex-direction: column; gap: 4px">
+              <span style="font-size: 14px; font-weight: 700">{{p.waitTitle}}</span>
+              <span style="font-size: 13px; line-height: 1.45; color: #5B6577">You’ll get a notification as soon as it opens.</span>
+            </span>
+          </div>
+          <button type="button" disabled="" style="height: 52px; border-radius: 14px; border: 0; background: #E3E7F0; color: #697285; font-size: 15px; font-weight: 700; cursor: not-allowed">Mark me present</button>
+        </sc-if>
+
+        <!-- Open: student can mark -->
+        <sc-if value="{{p.isOpen}}" hint-placeholder-val="{{false}}">
+          <div style="display: flex; gap: 12px; padding: 14px; border-radius: 14px; background: #E3F8EC">
+            <span aria-hidden="true" style="width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%; background: #12893F; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 7.5-2"></path></svg>
+            </span>
+            <span style="display: flex; flex-direction: column; gap: 4px">
+              <span style="font-size: 14px; font-weight: 700; color: #054F31">Portal opened at 10:02</span>
+              <span style="font-size: 13px; line-height: 1.45; color: #067647">Mark your attendance now</span>
+            </span>
+          </div>
+          <button type="button" onClick="{{mark}}" style="height: 52px; border-radius: 14px; border: 0; background: #13235B; color: #FFFFFF; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg>
+            Mark me present
+          </button>
+          <span style="display: flex; align-items: flex-start; gap: 6px; font-size: 12px; line-height: 1.45; color: #5B6577">
+            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
+            Location needs to be turned on to mark attendance.
+          </span>
+        </sc-if>
+
+        <!-- Marked, portal still open -->
+        <sc-if value="{{p.isMarked}}" hint-placeholder-val="{{false}}">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 14px; border-radius: 14px; background: #E3F8EC; text-align: center">
+            <span aria-hidden="true" style="width: 52px; height: 52px; border-radius: 50%; background: #12893F; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg>
+            </span>
+            <span style="font-size: 17px; font-weight: 800; color: #054F31">You’re marked present</span>
+          </div>
+        </sc-if>
+
+        <!-- Closed -->
+        <sc-if value="{{p.isClosed}}" hint-placeholder-val="{{false}}">
+          <div style="display: flex; gap: 12px; padding: 14px; border-radius: 14px; background: #F7F8FB">
+            <span aria-hidden="true" style="width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%; background: #12893F; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg>
+            </span>
+            <span style="display: flex; flex-direction: column; gap: 4px">
+              <span style="font-size: 14px; font-weight: 700">Present for today’s class</span>
+              <span style="font-size: 13px; line-height: 1.45; color: #5B6577">The attendance has been closed</span>
+            </span>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 14px; border: 1px solid #EDF0F6">
+            <span style="display: flex; flex-direction: column; gap: 2px">
+              <span style="font-size: 12px; font-weight: 600; color: #5B6577">MAN-301 attendance</span>
+              <span style="font-size: 13px; color: #3A4456"><strong style="color: #0E1726">11</strong> of 15 classes</span>
+            </span>
+            <span style="display: flex; align-items: baseline; gap: 6px">
+              <span style="font-size: 13px; font-weight: 700; color: #5B6577; text-decoration: line-through">71%</span>
+              <span style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: #B42318">73%</span>
+            </span>
+          </div>
+          <a href="{{attHref}}" style="align-self: center; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; padding: 4px 0">Course-wise attendance
+            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+          </a>
+        </sc-if>
+      </article>
+    </section>
+
+    </sc-if>
+
+    <!-- 3. What happened, in order -->
+    <sc-if value="{{hasLog}}" hint-placeholder-val="{{false}}">
+      <section aria-labelledby="log-h" style="display: flex; flex-direction: column; gap: 12px">
+        <h2 id="log-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Activity</h2>
+        <ol style="margin: 0; padding: 4px 16px; list-style: none; background: #FFFFFF; border: 1px solid #E3E7F0; border-radius: 20px; display: flex; flex-direction: column">
+          <sc-for list="{{log}}" as="l" hint-placeholder-count="3">
+            <li style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: {{l.divider}}">
+              <span aria-hidden="true" style="width: 10px; height: 10px; flex-shrink: 0; border-radius: 50%; background: {{l.dot}}"></span>
+              <span style="flex: 1; font-size: 14px; font-weight: 600">{{l.text}}</span>
+              <span style="font-size: 12px; color: #5B6577">{{l.time}}</span>
+            </li>
+          </sc-for>
+        </ol>
+      </section>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"stage":{"editor":"enum","options":["select","waiting","open","marked","closed"],"default":"select"},"showPush":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    // stage/push are null until something happens here, so the tweaks drive the static artboards.
+    this.state = { course: null, stage: null, push: null };
+  }
+  go(stage, push) {
+    this.setState({ stage, push });
+    clearTimeout(this._hide);
+    if (push) this._hide = setTimeout(() => this.setState({ push: 'none' }), 4500);
+  }
+  renderVals() {
+    const S = this.state;
+    // 'select' is the neutral start: no course picked, no portal section.
+    const base = this.props.stage || 'select';
+    const course = S.course || (base === 'select' ? null : 'MAN-301');
+    const stage = S.stage || (base === 'select' ? (course ? 'waiting' : 'select') : base);
+    const auto = !!this.props.auto;
+
+    // Interactive preview: the professor opens the portal a few seconds after you arrive,
+    // and closes it a few seconds after you mark yourself present.
+    if (auto && stage === 'waiting' && course === 'MAN-301' && !this._openT) {
+      this._openT = setTimeout(() => this.go('open', 'open'), 3000);
+    }
+    if (auto && stage === 'marked' && !this._closeT) {
+      this._closeT = setTimeout(() => this.go('closed', 'closed'), 4000);
+    }
+
+    const RAW = [
+      { code: 'CSN-341', name: 'Computer Networks', time: '09:00 – 09:55', room: 'LHC 102', prof: 'Prof. S. Iyer', s: 'done' },
+      { code: 'MAN-301', name: 'Probability & Statistics', time: '10:00 – 10:55', room: 'LHC 204', prof: 'Dr. M. Kulkarni', s: 'now' },
+      { code: 'HSN-351', name: 'Management Techniques', time: '12:00 – 12:55', room: 'LHC 008', prof: 'Prof. A. Ghosh', s: 'later' },
+      { code: 'CSN-361', name: 'Networks Lab', time: '14:00 – 16:55', room: 'CSE Lab 2', prof: 'Dr. N. Rao', s: 'later' }
+    ];
+    const courses = RAW.map((c) => {
+      const nowMarked = c.code === 'MAN-301' && (stage === 'marked' || stage === 'closed');
+      // Once marked, a course card looks exactly like the earlier, already-done one.
+      const done = c.s === 'done' || nowMarked;
+      const on = !done && c.code === course;
+      const tag = nowMarked ? 'Present | 10:03' : done ? 'Present | 09:04' : '';
+      return {
+        ...c,
+        meta: c.time + ' | ' + c.room,
+        tag, hasTag: tag !== '',
+        tagBg: done || nowMarked ? '#E3F8EC' : c.s === 'now' ? '#DCE4FF' : '#EDF0F6',
+        tagFg: done || nowMarked ? '#067647' : c.s === 'now' ? '#2448C9' : '#3A4456',
+        checked: on ? 'true' : 'false',
+        disabled: done,
+        isDone: done || nowMarked, isOn: on && !nowMarked,
+        ink: done ? '#5B6577' : '#0E1726',
+        bg: done ? '#F7F8FB' : '#FFFFFF',
+        border: on ? '1.5px solid #13235B' : '1px solid #E3E7F0',
+        dotBorder: done || nowMarked ? '0' : on ? '2px solid #13235B' : '2px solid #C3C9D6',
+        dotBg: done || nowMarked ? '#12893F' : '#FFFFFF',
+        cursor: done ? 'default' : 'pointer',
+        pick: () => { if (!done) this.setState({ course: c.code }); }
+      };
+    });
+    const sel = RAW.find((c) => c.code === course) || RAW[1];
+    const isNow = sel.code === 'MAN-301';
+    const st = isNow && stage !== 'select' ? stage : 'waiting';
+
+    const CHIP = {
+      waiting: ['Portal closed', '#EDF0F6', '#3A4456', '#8A93A6', 'none'],
+      open:    ['Portal open', '#E3F8EC', '#067647', '#12893F', 'livePulse 1.6s infinite'],
+      marked:  ['Portal open', '#E3F8EC', '#067647', '#12893F', 'livePulse 1.6s infinite'],
+      closed:  ['Portal closed', '#EDF0F6', '#3A4456', '#8A93A6', 'none']
+    }[st];
+    const p = {
+      chip: CHIP[0], chipBg: CHIP[1], chipFg: CHIP[2], dot: CHIP[3], dotAnim: CHIP[4],
+      isWaiting: st === 'waiting', isOpen: st === 'open', isMarked: st === 'marked', isClosed: st === 'closed',
+      waitTitle: isNow ? 'Waiting for ' + sel.prof + ' to open attendance' : 'Opens during class at ' + sel.time.slice(0, 5)
+    };
+
+    // Notification banner
+    const pushKind = S.push === null ? (this.props.showPush ? (stage === 'closed' ? 'closed' : stage === 'open' ? 'open' : 'none') : 'none') : S.push;
+    const push = {
+      show: pushKind === 'open' || pushKind === 'closed',
+      isOpen: pushKind === 'open', isClosed: pushKind === 'closed',
+      iconBg: pushKind === 'open' ? '#12893F' : '#13235B',
+      title: pushKind === 'open' ? 'Attendance open | MAN-301' : 'Attendance closed | MAN-301',
+      body: pushKind === 'open'
+        ? 'Dr. M. Kulkarni opened the portal in LHC 204. Tap to mark yourself present.'
+        : 'Dr. M. Kulkarni closed the portal. You were marked present.',
+      tap: () => { clearTimeout(this._hide); this.setState({ push: 'none', course: 'MAN-301' }); }
+    };
+
+    const LOG = [];
+    if (isNow && stage !== 'select' && st !== 'waiting') LOG.push({ text: 'Portal opened by Dr. M. Kulkarni', time: '10:02', dot: '#12893F' });
+    if (isNow && (st === 'marked' || st === 'closed')) LOG.push({ text: 'You marked yourself present', time: '10:03', dot: '#2F5BEA' });
+    if (isNow && st === 'closed') LOG.push({ text: 'Portal closed', time: '10:08', dot: '#8A93A6' });
+    const log = LOG.map((l, i) => ({ ...l, divider: i === 0 ? '0' : '1px solid #EDF0F6' }));
+
+    const CLOCK = { select: '10:00', waiting: '10:01', open: '10:02', marked: '10:03', closed: '10:08' };
+
+    return {
+      courses, sel, p, push, log, hasLog: log.length > 0,
+      hasPortal: stage !== 'select',
+      clock: CLOCK[stage],
+      mark: () => this.go('marked', 'none'),
+      backHref: this.props.backHref || 'Main.dc.html',
+      attHref: this.props.attHref || 'Attendance.dc.html',
+      minH: this.props.minH || '844px'
+    };
+  }
+}
+</script>
+</body>
+</html>

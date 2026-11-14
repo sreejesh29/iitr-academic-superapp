@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Campus app – Assignments</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2448C9;text-decoration:none}a:hover{color:#16308F}
+button{font-family:inherit;cursor:pointer}
+textarea::placeholder{color:#697285}
+.hs{scrollbar-width:none}.hs::-webkit-scrollbar{display:none}
+@keyframes toastIn{from{transform:translateY(-6px);opacity:0}to{transform:none;opacity:1}}
+</style>
+</helmet>
+
+<div style="position: relative; width: 390px; min-height: {{minH}}; box-sizing: border-box; background: #F3F5FA; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #0E1726; display: flex; flex-direction: column; overflow-x: clip">
+
+  <!-- ===================== LIST ===================== -->
+  <sc-if value="{{isList}}" hint-placeholder-val="{{true}}">
+    <header style="position: sticky; top: 0; z-index: 0; background: #13235B; padding: 16px 16px 64px; display: flex; flex-direction: column; gap: 16px; color: #FFFFFF">
+      <div style="display: flex; align-items: center; gap: 8px">
+        <a href="{{backHref}}" aria-label="{{backLabel}}" style="width: 44px; height: 44px; border-radius: 14px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+        </a>
+        <div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0">
+          <h1 style="margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.3">Assignments</h1>
+          <span style="font-size: 12px; color: #C9D2EC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{headerSub}}</span>
+        </div>
+      </div>
+
+      <!-- Role switch: students who are also a TA can manage the course they assist -->
+      <sc-if value="{{showRole}}" hint-placeholder-val="{{true}}">
+        <div role="tablist" aria-label="Assignments view" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); padding: 4px; border-radius: 14px; background: rgba(255,255,255,0.12)">
+          <span role="tab" aria-selected="true" style="height: 36px; border-radius: 10px; background: #FFFFFF; color: #13235B; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">Your assignments</span>
+          <a href="{{taHref}}" role="tab" aria-selected="false" aria-label="TA, 3 courses" style="height: 36px; border-radius: 10px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: 700">TA <span style="font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 5px; background: #FCE7B4; color: #8A4B00">3 courses</span></a>
+        </div>
+      </sc-if>
+
+      <!-- Course switcher (when opened from Courses) -->
+      <sc-if value="{{byCourse}}" hint-placeholder-val="{{false}}">
+        <div role="tablist" aria-label="Course" class="hs" style="margin: 0 -16px; display: flex; gap: 8px; overflow-x: auto; padding: 0 16px">
+          <sc-for list="{{courseTabs}}" as="c" hint-placeholder-count="6">
+            <button type="button" role="tab" aria-selected="{{c.selected}}" onClick="{{c.pick}}" style="flex-shrink: 0; height: 36px; padding: 0 14px; border-radius: 999px; border: 0; background: {{c.bg}}; color: {{c.fg}}; font-size: 13px; font-weight: 700">{{c.code}}</button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+        <sc-for list="{{tiles}}" as="t" hint-placeholder-count="3">
+          <div style="padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.12); display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 12px; color: #C9D2EC">{{t.label}}</span>
+            <span style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px">{{t.n}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </header>
+
+    <div style="position: relative; z-index: 1; margin-top: -28px; flex: 1; background: #F3F5FA; border-radius: 28px 28px 0 0; padding: 10px 16px 40px; box-shadow: 0 -10px 30px rgba(14,23,38,0.22); display: flex; flex-direction: column; gap: 28px">
+      <div aria-hidden="true" style="width: 40px; height: 5px; margin: 0 auto -18px; border-radius: 3px; background: #C9D2EC"></div>
+
+      <!-- Sort by due date -->
+
+
+      <sc-if value="{{noAssignments}}" hint-placeholder-val="{{false}}">
+        <p style="margin: 0; padding: 20px 16px; border-radius: 20px; background: #FFFFFF; border: 1px solid #E3E7F0; font-size: 14px; color: #3A4456; text-align: center">No assignments posted for this course yet.</p>
+      </sc-if>
+
+      <sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
+        <section style="display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <h2 style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">{{g.title}}</h2>
+          </div>
+          <sc-for list="{{g.items}}" as="a" hint-placeholder-count="3">
+            <a href="{{a.href}}" onClick="{{a.open}}" style="box-sizing: border-box; background: #FFFFFF; border: 1px solid #E3E7F0; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 10px; color: #0E1726">
+              <span style="align-self: flex-start; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 6px; background: {{a.chipBg}}; color: {{a.chipFg}}">{{a.dueShort}}</span>
+              <span style="font-size: 16px; font-weight: 700; line-height: 1.35">{{a.title}}</span>
+              <span style="font-size: 12px; color: #5B6577">{{a.code}} | {{a.course}}</span>
+              <span aria-hidden="true" style="height: 1px; background: #EDF0F6"></span>
+              <span style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+                <span style="font-size: 12px; font-weight: 700; color: {{a.statusFg}}">{{a.statusShort}}</span>
+                <span style="width: 32px; height: 32px; color: #2448C9; display: flex; align-items: center; justify-content: flex-end; flex-shrink: 0">
+                  <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+                </span>
+              </span>
+            </a>
+          </sc-for>
+        </section>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- ===================== DETAIL ===================== -->
+  <sc-if value="{{isDetail}}" hint-placeholder-val="{{false}}">
+    <header style="position: sticky; top: 0; z-index: 0; background: #13235B; padding: 16px 16px 64px; display: flex; flex-direction: column; gap: 16px; color: #FFFFFF">
+      <div style="display: flex; align-items: center; gap: 8px">
+        <a href="{{d.backHref}}" onClick="{{d.back}}" aria-label="Back to assignments" style="width: 44px; height: 44px; border-radius: 14px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+        </a>
+        <div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0">
+          <h1 title="{{d.title}}" style="margin: 0; font-size: 19px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{d.title}}</h1>
+          <span style="font-size: 12px; font-weight: 600; color: #C9D2EC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{d.code}} | {{d.course}}</span>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1.35fr 1fr 0.75fr; gap: 8px">
+        <div style="padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.12); display: flex; flex-direction: column; gap: 2px; min-width: 0">
+          <span style="font-size: 12px; color: #C9D2EC">Due</span>
+          <span title="{{d.dueLabel}}" style="font-size: 14px; font-weight: 800; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{d.dueLabel}}</span>
+        </div>
+        <div style="padding: 12px; border-radius: 14px; background: {{d.leftBg}}; display: flex; flex-direction: column; gap: 2px; min-width: 0">
+          <span style="font-size: 12px; color: #C9D2EC">{{d.leftLabel}}</span>
+          <span style="font-size: 14px; font-weight: 800; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{d.left}}</span>
+        </div>
+        <div style="padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.12); display: flex; flex-direction: column; gap: 2px; min-width: 0">
+          <span style="font-size: 12px; color: #C9D2EC">Marks</span>
+          <span style="font-size: 14px; font-weight: 800; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{d.graded}}</span>
+        </div>
+      </div>
+    </header>
+
+    <div style="position: relative; z-index: 1; margin-top: -28px; flex: 1; background: #F3F5FA; border-radius: 28px 28px 0 0; padding: 10px 16px 40px; box-shadow: 0 -10px 30px rgba(14,23,38,0.22); display: flex; flex-direction: column; gap: 28px">
+      <div aria-hidden="true" style="width: 40px; height: 5px; margin: 0 auto -18px; border-radius: 3px; background: #C9D2EC"></div>
+
+      <!-- Status -->
+      <p role="status" style="margin: 0; display: flex; gap: 10px; padding: 12px 14px; border-radius: 14px; background: {{d.st.bg}}; color: {{d.st.fg}}">
+        <span aria-hidden="true" style="width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%; background: {{d.st.dot}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; margin-top: 1px">
+          <sc-if value="{{d.st.isLock}}" hint-placeholder-val="{{false}}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+          </sc-if>
+          <sc-if value="{{d.st.isCheck}}" hint-placeholder-val="{{true}}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg>
+          </sc-if>
+          <sc-if value="{{d.st.isBang}}" hint-placeholder-val="{{false}}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M12 6v7M12 18h.01"></path></svg>
+          </sc-if>
+        </span>
+        <span style="display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 14px; font-weight: 700">{{d.st.title}}</span>
+          <span style="font-size: 13px; line-height: 1.45; opacity: 0.9">{{d.st.body}}</span>
+        </span>
+      </p>
+
+      <!-- Instructions from the professor / TA -->
+      <section aria-labelledby="ins-h" style="display: flex; flex-direction: column; gap: 12px">
+        <h2 id="ins-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Instructions</h2>
+        <article style="background: #FFFFFF; border: 1px solid #E3E7F0; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; align-items: center; gap: 10px">
+            <span aria-hidden="true" style="width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; background: #13235B; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">{{d.initials}}</span>
+            <span style="display: flex; flex-direction: column; gap: 1px">
+              <span style="font-size: 14px; font-weight: 700">{{d.by}}</span>
+              <span style="font-size: 12px; color: #5B6577">{{d.posted}}</span>
+            </span>
+          </div>
+          <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #3A4456">{{d.body}}</p>
+
+          <dl style="margin: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px">
+            <sc-for list="{{d.facts}}" as="f" hint-placeholder-count="4">
+              <div style="padding: 10px 12px; border-radius: 12px; background: #F7F8FB; display: flex; flex-direction: column; gap: 2px">
+                <dt style="font-size: 12px; font-weight: 600; color: #5B6577">{{f.k}}</dt>
+                <dd style="margin: 0; font-size: 13px; font-weight: 700; color: #0E1726">{{f.v}}</dd>
+              </div>
+            </sc-for>
+          </dl>
+
+          <sc-if value="{{d.hasTaNote}}" hint-placeholder-val="{{false}}">
+            <div style="padding: 12px; border-radius: 12px; background: #FFF4DB; display: flex; flex-direction: column; gap: 4px">
+              <span style="display: flex; align-items: center; gap: 6px">
+                <span style="font-size: 12px; font-weight: 700; color: #4A2800">{{d.taName}}</span>
+                <span style="font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 5px; background: #4A2800; color: #FFFFFF">TA</span>
+              </span>
+              <span style="font-size: 13px; line-height: 1.45; color: #4A2800">{{d.taNote}}</span>
+            </div>
+          </sc-if>
+
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <span style="font-size: 12px; font-weight: 700; color: #5B6577">Attachments</span>
+            <sc-for list="{{d.files}}" as="f" hint-placeholder-count="2">
+              <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: #F3F5FA; color: #0E1726">
+                <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                  <span style="font-size: 13px; font-weight: 600">{{f.name}}</span>
+                  <span style="font-size: 12px; color: #5B6577">{{f.meta}}</span>
+                </span>
+                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B6577" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg>
+              </a>
+            </sc-for>
+          </div>
+        </article>
+      </section>
+
+      <!-- Your submission -->
+      <section aria-labelledby="sub-h" style="display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <h2 id="sub-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Your submission</h2>
+          <span style="font-size: 13px; color: #5B6577">{{d.subHint}}</span>
+        </div>
+
+        <sc-if value="{{d.hasToast}}" hint-placeholder-val="{{false}}">
+          <p role="status" style="margin: 0; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; background: {{d.toastBg}}; color: {{d.toastFg}}; font-size: 13px; font-weight: 600; animation: toastIn 0.3s ease-out">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0"><path d="m5 12 5 5 9-10"></path></svg>
+            {{d.toast}}
+          </p>
+        </sc-if>
+
+        <!-- Uploaded files: before the deadline each one can be replaced or deleted -->
+        <sc-if value="{{d.showCard}}" hint-placeholder-val="{{true}}">
+          <div style="background: #FFFFFF; border: 1px solid #E3E7F0; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+
+            <sc-if value="{{d.hasSubs}}" hint-placeholder-val="{{true}}">
+              <ul aria-label="Uploaded files" style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column">
+                <sc-for list="{{d.subs}}" as="f" hint-placeholder-count="2">
+                  <li style="padding: 12px 0; border-top: {{f.divider}}; display: flex; flex-direction: column; gap: 10px">
+                    <div style="display: flex; align-items: center; gap: 10px">
+                      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px">
+                        <span style="font-size: 13px; font-weight: 700; overflow-wrap: anywhere">{{f.name}}</span>
+                        <span style="font-size: 12px; color: #5B6577">{{f.meta}}</span>
+                      </span>
+                      <sc-if value="{{f.isNew}}" hint-placeholder-val="{{false}}">
+                        <span style="flex-shrink: 0; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: #E3F8EC; color: #067647">Updated</span>
+                      </sc-if>
+                    </div>
+
+                    <sc-if value="{{f.showActions}}" hint-placeholder-val="{{true}}">
+                      <div style="display: flex; gap: 8px">
+                        <button type="button" onClick="{{f.replace}}" aria-label="{{f.replaceAria}}" style="height: 34px; padding: 0 12px; border-radius: 10px; border: 1px solid #E3E7F0; background: #FFFFFF; color: #13235B; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px">
+                          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"></path><path d="M21 3v5h-5"></path></svg>
+                          Re-upload
+                        </button>
+                        <button type="button" onClick="{{f.askDelete}}" aria-label="{{f.deleteAria}}" style="height: 34px; padding: 0 12px; border-radius: 10px; border: 1px solid #F4C7C2; background: #FFFFFF; color: #B42318; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px">
+                          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"></path></svg>
+                          Delete
+                        </button>
+                      </div>
+                    </sc-if>
+
+                    <sc-if value="{{f.confirming}}" hint-placeholder-val="{{false}}">
+                      <div role="alertdialog" aria-label="Confirm delete" style="padding: 12px; border-radius: 12px; background: #FDE7E4; display: flex; flex-direction: column; gap: 10px">
+                        <span style="font-size: 13px; line-height: 1.45; font-weight: 600; color: #7A1A12">Delete this file? It will no longer be part of your submission.</span>
+                        <span style="display: flex; gap: 8px">
+                          <button type="button" onClick="{{f.cancelDelete}}" style="flex: 1; height: 36px; border-radius: 10px; border: 1px solid #F4C7C2; background: #FFFFFF; color: #3A4456; font-size: 13px; font-weight: 700">Cancel</button>
+                          <button type="button" onClick="{{f.doDelete}}" style="flex: 1; height: 36px; border-radius: 10px; border: 0; background: #B42318; color: #FFFFFF; font-size: 13px; font-weight: 700">Delete</button>
+                        </span>
+                      </div>
+                    </sc-if>
+                  </li>
+                </sc-for>
+              </ul>
+            </sc-if>
+
+            <sc-if value="{{d.canAdd}}" hint-placeholder-val="{{true}}">
+              <button type="button" onClick="{{d.add}}" style="padding: {{d.addPad}}; border-radius: 16px; border: 1.5px dashed #C3C9D6; background: #F7F8FB; display: flex; flex-direction: {{d.addDir}}; align-items: center; justify-content: center; gap: {{d.addGap}}; color: #0E1726">
+                <span aria-hidden="true" style="width: {{d.addIcon}}; height: {{d.addIcon}}; border-radius: 12px; background: #EEF2FF; color: #2448C9; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M17 8l-5-5-5 5M12 3v12"></path></svg>
+                </span>
+                <span style="display: flex; flex-direction: column; align-items: {{d.addAlign}}; gap: 2px">
+                  <span style="font-size: 14px; font-weight: 700">{{d.addLabel}}</span>
+                  <span style="font-size: 12px; color: #5B6577">{{d.formatHint}}</span>
+                </span>
+              </button>
+            </sc-if>
+            <sc-if value="{{d.atMax}}" hint-placeholder-val="{{false}}">
+              <p style="margin: 0; padding: 10px 12px; border-radius: 12px; background: #F7F8FB; font-size: 12px; line-height: 1.45; color: #3A4456">You’ve reached the {{d.maxFiles}}-file limit. Re-upload or delete a file to change your submission.</p>
+            </sc-if>
+
+            <!-- Comments -->
+            <sc-if value="{{d.isOpen}}" hint-placeholder-val="{{true}}">
+              <label style="display: flex; flex-direction: column; gap: 6px; padding-top: 12px; border-top: 1px solid #EDF0F6">
+                <span style="font-size: 13px; font-weight: 700; color: #3A4456">Comments <span style="font-weight: 500; color: #5B6577">(optional)</span></span>
+                <textarea rows="3" placeholder="Provide any comments that you want your TAs or professor to read along with your submission" defaultValue="{{d.comment}}" style="box-sizing: border-box; width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid #E3E7F0; background: #F7F8FB; font-family: inherit; font-size: 14px; line-height: 1.5; color: #0E1726; resize: none; outline: none"></textarea>
+              </label>
+              <div style="display: flex; flex-direction: column; gap: 8px">
+                <button type="button" onClick="{{d.saveComment}}" style="height: 48px; border-radius: 12px; border: 0; background: #13235B; color: #FFFFFF; font-size: 15px; font-weight: 700">Submit assignment</button>
+                <span style="font-size: 12px; line-height: 1.45; color: #5B6577; text-align: center">{{d.resubmitNote}}</span>
+              </div>
+            </sc-if>
+            <sc-if value="{{d.showClosedComment}}" hint-placeholder-val="{{false}}">
+              <div style="padding-top: 12px; border-top: 1px solid #EDF0F6; display: flex; flex-direction: column; gap: 6px">
+                <span style="font-size: 12px; font-weight: 700; color: #5B6577">Your comment</span>
+                <span style="padding: 10px 12px; border-radius: 12px; background: #F7F8FB; font-size: 13px; line-height: 1.45; color: #3A4456">{{d.comment}}</span>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+
+      </section>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"open":{"editor":"enum","options":["","csn341","csn341a2","man301","hsn351","csn345","csn343"],"default":""},"byCourse":{"editor":"boolean","default":false},"course":{"editor":"enum","options":["CSN-341","CSN-343","CSN-345","CSN-361","MAN-301","HSN-351"],"default":"CSN-341"},"$preview":{"width":390,"height":1392}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    // open: undefined until the student navigates inside this screen.
+    // subs: per-assignment file list once the student changes it; confirm: file awaiting delete.
+    this.state = { open: undefined, subs: {}, confirm: null, toast: null, seq: 0, sort: 'soonest', course: null };
+  }
+  renderVals() {
+    const S = this.state;
+    const P = this.props;
+
+    // Today is Mon 9 Nov, 10:20.
+    const A = {
+      csn341: {
+        code: 'CSN-341', course: 'Computer Networks', title: 'Assignment 3: Subnetting & CIDR',
+        by: 'Prof. S. Iyer', initials: 'SI', posted: '2 Nov', due: 'Today, 11:59 PM', dueFull: '9 Nov, 11:59 PM', left: '13h 39m',
+        open: true, urg: 'today', marks: '20',
+        body: 'Answer all six questions. For Q3–Q5, show the binary working for every subnet. Q6 asks you to design an addressing plan for the campus network in the attached diagram.',
+        facts: [['Type', 'Individual'], ['Format', 'PDF or images'], ['Files', 'Up to 3 | 10 MB each'], ['Late submissions', 'Not accepted']],
+        maxFiles: Infinity, prefix: 'A3',
+        ta: ['Rahul Verma', 'Scanned handwritten work is fine if it is legible. Put your enrolment number on the first page.'],
+        files: [['Assignment 3 – Questions.pdf', '420 KB', 'pdf'], ['Campus network diagram.png', '1.1 MB', 'img']],
+        subs: [
+          { fid: 'a', name: 'A3_Q1-Q5_Aarav_Mehta.pdf', kind: 'pdf', when: '8 Nov, 21:40', size: '2.4 MB', v: 1 },
+          { fid: 'b', name: 'A3_Q6_addressing_plan.png', kind: 'img', when: '8 Nov, 21:42', size: '1.3 MB', v: 1 }
+        ],
+        comment: 'Q6 assumes a /22 block for the hostel network.'
+      },
+      man301: {
+        code: 'MAN-301', course: 'Probability & Statistics', title: 'Problem Set 5: Random Variables',
+        by: 'Dr. M. Kulkarni', initials: 'MK', posted: '3 Nov', due: 'Tomorrow, 11:59 PM', dueFull: '10 Nov, 11:59 PM', left: '1d 13h',
+        open: true, urg: 'soon', marks: '30',
+        body: 'Solve problems 1–8 from Chapter 4. Problems 7 and 8 need a short simulation: include your code and output as an appendix in the same PDF.',
+        facts: [['Type', 'Individual'], ['Format', 'PDF'], ['Files', '10 MB each'], ['Late submissions', 'Not accepted']],
+        maxFiles: Infinity, prefix: 'PS5',
+        ta: null,
+        files: [['Problem set 5.pdf', '310 KB', 'pdf']],
+        subs: [], comment: ''
+      },
+      hsn351: {
+        code: 'HSN-351', course: 'Management Techniques', title: 'Case study: Lean operations',
+        by: 'Prof. A. Ghosh', initials: 'AG', posted: '30 Oct', due: '13 Nov, 5:00 PM', dueFull: '13 Nov, 5:00 PM', left: '4d 6h',
+        open: true, urg: 'later', marks: '25',
+        body: 'Read the Toyota production case and write a 1,500-word analysis of two lean practices that could work in the institute mess. One member uploads for the group.',
+        facts: [['Type', 'Group of 4'], ['Format', 'PDF or DOCX'], ['Files', 'Up to 3 | 20 MB each'], ['Late submissions', 'Not accepted']],
+        maxFiles: Infinity, prefix: 'LeanCase_Group2',
+        ta: ['Neha Joshi', 'List all four names and enrolment numbers on the cover page.'],
+        files: [['Toyota production case.pdf', '2.2 MB', 'pdf'], ['Rubric.pdf', '90 KB', 'pdf']],
+        subs: [], comment: ''
+      },
+      csn345: {
+        code: 'CSN-345', course: 'Software Engineering', title: 'SRS document: Mess feedback app',
+        by: 'Dr. K. Bhat', initials: 'KB', posted: '20 Oct', due: '5 Nov, 11:59 PM', dueFull: '5 Nov, 11:59 PM', left: 'Closed',
+        open: false, urg: 'closed', marks: '40', graded: '34/40',
+        body: 'Write the software requirements specification for your team project using the IEEE 830 template. Include use-case diagrams and at least ten functional requirements.',
+        facts: [['Type', 'Team of 3'], ['Format', 'PDF'], ['Files', 'Up to 3 | 20 MB each'], ['Late submissions', 'Not accepted']],
+        maxFiles: Infinity, prefix: 'SRS_Team7',
+        ta: null,
+        files: [['IEEE 830 template.docx', '64 KB', 'doc']],
+        subs: [
+          { fid: 'a', name: 'SRS_Team7.pdf', kind: 'pdf', when: '5 Nov, 22:15', size: '3.1 MB', v: 2 },
+          { fid: 'b', name: 'SRS_Team7_use-case_diagrams.pdf', kind: 'pdf', when: '5 Nov, 22:10', size: '1.2 MB', v: 1 }
+        ],
+        comment: 'Updated the use-case diagram after review.'
+      },
+      csn343: {
+        code: 'CSN-343', course: 'Theory of Computation', title: 'Problem Set 4: Pushdown automata',
+        by: 'Prof. R. Menon', initials: 'RM', posted: '26 Oct', due: '4 Nov, 11:59 PM', dueFull: '4 Nov, 11:59 PM', left: 'Closed',
+        open: false, urg: 'closed', marks: '20', graded: '0/20',
+        body: 'Construct PDAs for the five languages listed and prove that the language in Q5 is not context-free using the pumping lemma.',
+        facts: [['Type', 'Individual'], ['Format', 'PDF'], ['Files', '1 | 10 MB'], ['Late submissions', 'Not accepted']],
+        maxFiles: Infinity, prefix: 'PS4',
+        ta: null,
+        files: [['Problem set 4.pdf', '280 KB', 'pdf']],
+        subs: [], comment: ''
+      },
+      csn341a2: {
+        code: 'CSN-341', course: 'Computer Networks', title: 'Assignment 2: IP addressing',
+        by: 'Prof. S. Iyer', initials: 'SI', posted: '15 Oct', due: '26 Oct, 11:59 PM', dueFull: '26 Oct, 11:59 PM', left: 'Closed',
+        open: false, urg: 'closed', marks: '20', graded: '18/20',
+        body: 'Work through the eight IPv4 addressing problems. Show how you found each network and broadcast address.',
+        facts: [['Type', 'Individual'], ['Format', 'PDF'], ['Files', ''], ['Late submissions', 'Not accepted']],
+        maxFiles: Infinity, prefix: 'A2',
+        ta: null,
+        files: [['Assignment 2 – Questions.pdf', '360 KB', 'pdf']],
+        subs: [{ fid: 'a', name: 'A2_Aarav_Mehta.pdf', kind: 'pdf', when: '25 Oct, 20:05', size: '1.6 MB', v: 1 }],
+        comment: ''
+      }
+    };
+    const ORDER = ['csn341', 'man301', 'hsn351', 'csn345', 'csn343', 'csn341a2'];
+
+    // Opened from Courses: show one course at a time with a course switcher.
+    const byCourse = !!P.byCourse;
+    const COURSE_NAMES = { 'CSN-341': 'Computer Networks', 'CSN-343': 'Theory of Computation', 'CSN-345': 'Software Engineering', 'CSN-361': 'Networks Lab', 'MAN-301': 'Probability & Statistics', 'HSN-351': 'Management Techniques' };
+    const cCode = S.course || P.course || 'CSN-341';
+    const inScope = (id) => !byCourse || A[id].code === cCode;
+    const courseTabs = Object.keys(COURSE_NAMES).map((c) => {
+      const on = c === cCode;
+      return {
+        code: c, selected: on ? 'true' : 'false',
+        bg: on ? '#FFFFFF' : 'rgba(255,255,255,0.12)', fg: on ? '#13235B' : '#FFFFFF',
+        pick: () => this.setState({ course: c })
+      };
+    });
+    const subsOf = (id) => S.subs[id] || A[id].subs;
+
+    const statusOf = (id) => {
+      const a = A[id];
+      const n = subsOf(id).length;
+      if (a.open && n) return { short: 'Submitted | you can still update', fg: '#067647', kind: 'sub' };
+      if (a.open) return { short: a.facts[0][1].startsWith('Group') ? 'Not submitted | group upload' : 'Not submitted', fg: '#B42318', kind: 'todo' };
+      if (n) return { short: 'Submitted | closed', fg: '#3A4456', kind: 'done' };
+      return { short: 'Missed | closed', fg: '#B42318', kind: 'missed' };
+    };
+
+    // ---------- Navigation ----------
+    const current = S.open !== undefined ? S.open : (P.open || '');
+    const internal = S.open !== undefined || !P.open;
+    const openId = (id) => (e) => { if (P.detailHrefs) return; if (e && e.preventDefault) e.preventDefault(); this.setState({ open: id, confirm: null, toast: null }); };
+
+    // ---------- List ----------
+    const CHIP = { today: ['#FDE7E4', '#B42318'], soon: ['#FFF4DB', '#8A4B00'], later: ['#EEF2FF', '#2448C9'], closed: ['#EDF0F6', '#3A4456'] };
+    const card = (id) => {
+      const a = A[id];
+      const st = statusOf(id);
+      return {
+        id, title: a.title, code: a.code, course: a.course,
+        dueShort: a.open ? 'Due ' + a.due.charAt(0).toLowerCase() + a.due.slice(1) : 'Closed ' + a.dueFull,
+        chipBg: CHIP[a.urg][0], chipFg: CHIP[a.urg][1],
+        statusShort: st.short, statusFg: st.fg,
+        href: '#',
+        open: openId(id)
+      };
+    };
+    // Due-date order (earliest first); the sort toggle flips it within each group.
+    const DUE_RANK = { csn341a2: 0, csn343: 1, csn345: 2, csn341: 3, man301: 4, hsn351: 5 };
+    const byDue = (x, y) => (S.sort === 'latest' ? DUE_RANK[y] - DUE_RANK[x] : DUE_RANK[x] - DUE_RANK[y]);
+    const scoped = ORDER.filter(inScope);
+    const openList = scoped.filter((id) => A[id].open).sort(byDue).map(card);
+    const pastList = scoped.filter((id) => !A[id].open).sort(byDue).map(card);
+    const groups = [
+      { title: 'Open assignments', sub: 'Sorted by due date', items: openList },
+      { title: 'Past deadline', sub: 'Uploads closed', items: pastList }
+    ].filter((g) => g.items.length > 0);
+    const kinds = scoped.map((id) => statusOf(id).kind);
+    const tiles = [
+      { label: 'To submit', n: kinds.filter((k) => k === 'todo').length },
+      { label: 'Submitted', n: kinds.filter((k) => k === 'sub' || k === 'done').length },
+      { label: 'Missed', n: kinds.filter((k) => k === 'missed').length }
+    ];
+
+    // ---------- Detail ----------
+    let d = { st: {}, facts: [], files: [], subs: [] };
+    if (current) {
+      const id = current;
+      const a = A[id];
+      const subs = subsOf(id);
+      const has = subs.length > 0;
+      const dueLc = a.due.charAt(0).toLowerCase() + a.due.slice(1);
+      const FILE = { pdf: ['#FDE7E4', '#B42318'], img: ['#E3F8EC', '#067647'], doc: ['#DCE4FF', '#2448C9'] };
+      const plural = (n) => n + (n === 1 ? ' file' : ' files');
+      let st;
+      if (a.open && has) st = { bg: '#E3F8EC', fg: '#054F31', dot: '#12893F', isCheck: true, title: 'Submitted | ' + plural(subs.length), body: 'You can add, re-upload or delete files until ' + dueLc + '. Whatever is here at the deadline is graded.' };
+      else if (a.open) st = { bg: '#FFF4DB', fg: '#4A2800', dot: '#B54708', isBang: true, title: 'Not submitted yet', body: 'Upload before ' + dueLc + '. You can change your files as many times as you like until then.' };
+      else if (has) st = { bg: '#EDF0F6', fg: '#0E1726', dot: '#3A4456', isLock: true, title: 'Submitted | deadline passed', body: 'These ' + plural(subs.length) + ' will be graded. No further changes can be made.' };
+      else st = { bg: '#FDE7E4', fg: '#7A1A12', dot: '#B42318', isLock: true, title: 'Missed', body: 'No file was uploaded before the deadline on ' + a.dueFull + '.' };
+      st = { isCheck: false, isBang: false, isLock: false, ...st };
+
+      const setSubs = (next, toast) => this.setState({ subs: { ...S.subs, [id]: next }, confirm: null, toast: toast ? { id, ...toast } : null, seq: S.seq + 1 });
+      const toast = S.toast && S.toast.id === id ? S.toast : null;
+      const atMax = subs.length >= a.maxFiles;
+      d = {
+        ...a,
+        st,
+        dueLabel: a.due,
+        // Weightage = total marks; Marks = what was awarded once graded.
+        leftLabel: 'Weightage',
+        left: a.marks,
+        graded: a.graded || '—',
+        leftBg: 'rgba(255,255,255,0.12)',
+        // Only the submission type is shown on the instruction card.
+        facts: a.facts.slice(0, 1).map((f) => ({ k: f[0], v: f[1] })),
+        hasTaNote: !!a.ta, taName: a.ta ? a.ta[0] : '', taNote: a.ta ? a.ta[1] : '',
+        files: a.files.map((f) => ({ name: f[0], meta: f[1], bg: FILE[f[2]][0], fg: FILE[f[2]][1] })),
+        isOpen: a.open, isClosed: !a.open,
+        subHint: a.open
+          ? (has ? plural(subs.length) + (isFinite(a.maxFiles) ? ' of ' + a.maxFiles : '') + ' uploaded | changes save straight away' : 'Nothing uploaded yet')
+          : (has ? 'Final submission' : 'No submission received'),
+        // Format plus file-count limit only; no per-file size shown.
+        formatHint: a.facts[1][1] + (isFinite(a.maxFiles) ? ' | Up to ' + a.maxFiles + (a.maxFiles === 1 ? ' file' : ' files') : ''),
+        showCard: a.open || has,
+        hasSubs: has,
+        subs: subs.map((f, i) => ({
+          name: f.name,
+          meta: 'v' + f.v + ' | ' + f.when + ' | ' + f.size,
+          iconBg: FILE[f.kind][0], iconFg: FILE[f.kind][1],
+          isNew: !!f.fresh && a.open,
+          divider: i === 0 ? '0' : '1px solid #EDF0F6',
+          showActions: a.open && S.confirm !== f.fid,
+          confirming: a.open && S.confirm === f.fid,
+          replaceAria: 'Re-upload ' + f.name,
+          deleteAria: 'Delete ' + f.name,
+          // Re-upload keeps the file's slot and bumps its version.
+          replace: () => setSubs(subs.map((x) => (x.fid === f.fid ? { ...x, v: x.v + 1, when: '9 Nov, 10:20', fresh: true } : x)),
+            { text: f.name + ' re-uploaded as v' + (f.v + 1) + '.', bg: '#E3F8EC', fg: '#054F31' }),
+          askDelete: () => this.setState({ confirm: f.fid, toast: null }),
+          cancelDelete: () => this.setState({ confirm: null }),
+          doDelete: () => setSubs(subs.filter((x) => x.fid !== f.fid), { text: f.name + ' deleted.', bg: '#EDF0F6', fg: '#0E1726' })
+        })),
+        canAdd: a.open && !atMax,
+        atMax: a.open && atMax,
+        maxFiles: a.maxFiles,
+        addLabel: has ? 'Add another file' : 'Upload files',
+        addPad: has ? '12px 14px' : '20px 16px',
+        addDir: has ? 'row' : 'column',
+        addGap: has ? '12px' : '8px',
+        addIcon: has ? '36px' : '44px',
+        addAlign: has ? 'flex-start' : 'center',
+        add: () => {
+          const n = S.seq + subs.length + 1;
+          const name = a.prefix + '_Aarav_Mehta' + (has ? '_part' + (subs.length + 1) : '') + '.pdf';
+          setSubs([...subs, { fid: 'n' + n, name, kind: 'pdf', when: '9 Nov, 10:20', size: '1.9 MB', v: 1, fresh: true }],
+            { text: name + ' uploaded.', bg: '#E3F8EC', fg: '#054F31' });
+        },
+        comment: a.comment,
+        showClosedComment: !a.open && !!a.comment,
+        saveComment: () => this.setState({ toast: { id, text: 'Assignment submitted.', bg: '#E3F8EC', fg: '#054F31' } }),
+        resubmitNote: 'You can re-upload until ' + dueLc + '. Only your last submission will be submitted for grading.',
+        hasToast: !!toast,
+        toast: toast ? toast.text : '', toastBg: toast ? toast.bg : '#E3F8EC', toastFg: toast ? toast.fg : '#054F31',
+        backHref: internal ? '#' : (P.listHref || 'Assignments.dc.html'),
+        back: (e) => { if (!internal) return; if (e && e.preventDefault) e.preventDefault(); this.setState({ open: '', confirm: null, toast: null }); }
+      };
+    }
+
+    return {
+      isList: !current, isDetail: !!current,
+      tiles, groups, d,
+      sortLabel: S.sort === 'latest' ? 'Latest first' : 'Earliest first',
+      sortAria: 'Sorted by due date, ' + (S.sort === 'latest' ? 'latest first' : 'earliest first') + '. Tap to reverse.',
+      toggleSort: () => this.setState({ sort: S.sort === 'latest' ? 'soonest' : 'latest' }),
+      byCourse, courseTabs,
+      showRole: !byCourse,
+      taHref: P.taHref || 'TaAssignments.dc.html',
+      headerSub: byCourse ? COURSE_NAMES[cCode] : 'Autumn semester 2026',
+      noAssignments: groups.length === 0,
+      backLabel: byCourse ? 'Back to Courses' : 'Back to Home',
+      backHref: P.backHref || (byCourse ? 'Courses.dc.html' : 'Main.dc.html'),
+      minH: P.minH || '844px'
+    };
+  }
+}
+</script>
+</body>
+</html>

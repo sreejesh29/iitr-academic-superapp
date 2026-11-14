@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Campus app – Collaboration</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2448C9;text-decoration:none}a:hover{color:#16308F}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.hscroll{scrollbar-width:none}.hscroll::-webkit-scrollbar{display:none}
+input::placeholder{color:#C9D2EC}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+
+<div style="position: relative; width: 390px; min-height: 844px; box-sizing: border-box; background: #F3F5FA; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #0E1726; display: flex; flex-direction: column; overflow-x: clip">
+
+  <!-- Header: solid navy, stays put while the sheet scrolls over it -->
+  <header style="position: sticky; top: 0; z-index: 0; background: #13235B; padding: 24px 20px 64px; display: flex; flex-direction: column; gap: 16px; color: #FFFFFF">
+    <div style="display: flex; align-items: center; gap: 2px">
+      <div style="display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; padding-right: 8px">
+        <h1 style="margin: 0; font-size: 21px; font-weight: 700; letter-spacing: -0.3px">Collaboration</h1>
+        <span style="font-size: 12px; color: #C9D2EC">{{openCount}} open opportunities on campus</span>
+      </div>
+      <a href="IdCard.dc.html" aria-label="Open digital ID card" style="width: 44px; height: 44px; border-radius: 14px; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2.5"></rect><circle cx="8" cy="11" r="2"></circle><path d="M5 16a3 3 0 0 1 6 0M14 10h5M14 14h3"></path></svg>
+      </a>
+      <a href="Notifications.dc.html" aria-label="Notifications, 3 unread" style="position: relative; width: 44px; height: 44px; border-radius: 14px; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+        <span aria-hidden="true" style="position: absolute; top: 10px; right: 11px; width: 8px; height: 8px; border-radius: 50%; background: #FF8A65; box-shadow: 0 0 0 2px #13235B"></span>
+      </a>
+      <a href="Profile.dc.html" aria-label="Profile" style="width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center"><span style="position: relative; display: block; width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; overflow: hidden; background: #DCE4FF; box-shadow: 0 0 0 2px #FFFFFF;"><img src="/_blob/d380e2b78f28a976382d51f88b9181ac" alt="" style="position: absolute; left: -205%; top: -46%; height: 300%; width: auto; max-width: none"></span></a>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 16px; border-radius: 14px; background: rgba(255,255,255,0.12)">
+      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C9D2EC" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+      <label for="oq" class="sr">Search opportunities</label>
+      <input id="oq" type="search" placeholder="Search by skill, project or person" style="flex: 1; border: 0; outline: none; background: transparent; color: #FFFFFF; font-family: inherit; font-size: 14px">
+    </div>
+
+    <!-- Primary action -->
+    <a href="{{postHref}}" style="height: 48px; border-radius: 14px; background: #FFFFFF; color: #13235B; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; font-weight: 700">
+      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+      <span>Post a collaboration</span>
+    </a>
+  </header>
+
+  <!-- Content sheet -->
+  <div style="position: relative; z-index: 1; margin-top: -28px; flex: 1; background: #F3F5FA; border-radius: 28px 28px 0 0; padding: 10px 0 120px; box-shadow: 0 -10px 30px rgba(14,23,38,0.22)">
+    <div aria-hidden="true" style="width: 40px; height: 5px; margin: 0 auto; border-radius: 3px; background: #C9D2EC"></div>
+
+    <!-- Your posts: swipeable carousel, one card per post -->
+    <section aria-labelledby="mine-h" style="margin: 18px 0 0; display: flex; flex-direction: column; gap: 12px">
+      <div style="margin: 0 16px; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px">
+        <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+          <h2 id="mine-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Your posts</h2>
+          <span style="font-size: 13px; color: #5B6577">Review the profiles students have shared</span>
+        </div>
+        <a href="{{postsHref}}" style="flex-shrink: 0; padding: 4px 0; font-size: 13px; font-weight: 700">See all</a>
+      </div>
+
+      <div role="list" aria-label="Your collaboration posts" class="hscroll" onScroll="{{onMineScroll}}" style="display: flex; gap: 12px; overflow-x: auto; padding: 0 16px 4px; scroll-snap-type: x mandatory; scroll-padding: 0 16px">
+        <sc-for list="{{mine}}" as="m" hint-placeholder-count="3">
+          <article role="listitem" aria-label="Your post: {{m.title}}" style="flex: 0 0 300px; box-sizing: border-box; scroll-snap-align: start; background: #FFFFFF; border: 1px solid #E3E7F0; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+              <span style="display: flex; gap: 6px">
+                <span style="font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: {{m.tagBg}}; color: {{m.tagFg}}">{{m.type}}</span>
+                <sc-if value="{{m.closed}}" hint-placeholder-val="{{false}}">
+                  <span style="font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: #EDF0F6; color: #5B6577">Closed</span>
+                </sc-if>
+              </span>
+              <span style="font-size: 12px; color: #5B6577; white-space: nowrap">{{m.meta}}</span>
+            </div>
+            <h3 style="margin: 0; font-size: 17px; font-weight: 700; line-height: 1.3; letter-spacing: -0.2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 44px">{{m.title}}</h3>
+            <!-- "New" only shows when there are new profiles -->
+            <dl style="margin: 0; display: grid; grid-template-columns: {{m.cols}}; padding: 12px 0; border-top: 1px solid #EDF0F6; border-bottom: 1px solid #EDF0F6">
+              <div style="display: flex; flex-direction: column; gap: 2px; padding-right: 12px">
+                <dt style="font-size: 12px; font-weight: 600; color: #5B6577">Profiles</dt>
+                <dd style="margin: 0; font-size: 22px; line-height: 1.1; font-weight: 800; color: #13235B">{{m.profiles}}</dd>
+              </div>
+              <sc-if value="{{m.hasNew}}" hint-placeholder-val="{{true}}">
+                <div style="display: flex; flex-direction: column; gap: 2px; padding: 0 12px; border-left: 1px solid #EDF0F6">
+                  <dt style="font-size: 12px; font-weight: 600; color: #5B6577">New</dt>
+                  <dd style="margin: 0; font-size: 22px; line-height: 1.1; font-weight: 800; color: #2448C9">{{m.fresh}}</dd>
+                </div>
+              </sc-if>
+              <div style="display: flex; flex-direction: column; gap: 2px; padding-left: 12px; border-left: 1px solid #EDF0F6">
+                <dt style="font-size: 12px; font-weight: 600; color: #5B6577">Shortlisted</dt>
+                <dd style="margin: 0; font-size: 22px; line-height: 1.1; font-weight: 800; color: #067647">{{m.short}}</dd>
+              </div>
+            </dl>
+            <a href="{{respHref}}" aria-label="Manage responses for {{m.title}}" style="height: 48px; border-radius: 12px; background: #13235B; color: #FFFFFF; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 700">
+              Manage responses
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+            </a>
+          </article>
+        </sc-for>
+      </div>
+
+      <!-- Position dots -->
+      <div aria-hidden="true" style="display: flex; justify-content: center; gap: 6px">
+        <sc-for list="{{mineDots}}" as="d" hint-placeholder-count="3">
+          <span style="width: {{d.w}}; height: 6px; border-radius: 3px; background: {{d.bg}}"></span>
+        </sc-for>
+      </div>
+    </section>
+
+    <section aria-labelledby="opp-h" style="margin-top: 28px; display: flex; flex-direction: column; gap: 12px">
+      <div style="margin: 0 16px; display: flex; flex-direction: column; gap: 2px">
+        <h2 id="opp-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Open opportunities</h2>
+        <span style="font-size: 13px; color: #5B6577">Share your profile with the poster in one tap</span>
+      </div>
+
+      <!-- Filters -->
+      <div role="group" aria-label="Filter by type" class="hscroll" style="display: flex; gap: 8px; overflow-x: auto; padding: 0 16px 2px">
+        <sc-for list="{{filters}}" as="f" hint-placeholder-count="5">
+          <button onClick="{{f.pick}}" aria-pressed="{{f.pressed}}" style="flex-shrink: 0; height: 36px; padding: 0 14px; border-radius: 999px; font-size: 13px; font-weight: 600; border: 1px solid {{f.border}}; background: {{f.bg}}; color: {{f.fg}}">{{f.label}}</button>
+        </sc-for>
+      </div>
+
+      <!-- Opportunity cards -->
+      <div style="margin: 0 16px; display: flex; flex-direction: column; gap: 12px">
+        <sc-for list="{{opps}}" as="o" hint-placeholder-count="4">
+          <article aria-label="{{o.title}}" style="background: #FFFFFF; border: 1px solid #E3E7F0; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+              <span style="font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: {{o.tagBg}}; color: {{o.tagFg}}">{{o.type}}</span>
+              <span style="font-size: 12px; color: #5B6577">{{o.posted}}</span>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px">
+              <span aria-hidden="true" style="width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; background: {{o.avBg}}; color: {{o.avFg}}; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">{{o.initials}}</span>
+              <div style="height: 36px; display: flex; flex-direction: column; justify-content: center; gap: 2px; min-width: 0">
+                <span style="font-size: 14px; line-height: 1.25; font-weight: 700">{{o.who}}</span>
+                <span style="font-size: 12px; line-height: 1.25; color: #5B6577">{{o.meta1}}</span>
+              </div>
+            </div>
+
+            <h3 style="margin: 0; font-size: 17px; font-weight: 700; line-height: 1.3; letter-spacing: -0.2px">{{o.title}}</h3>
+
+            <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #3A4456">{{o.body}}</p>
+
+            <ul aria-label="Skills wanted" style="margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px">
+              <sc-for list="{{o.skills}}" as="s" hint-placeholder-count="3">
+                <li style="font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 6px; background: #F3F5FA; color: #3A4456">{{s}}</li>
+              </sc-for>
+            </ul>
+
+            <div style="display: flex; align-items: center; gap: 16px; padding-top: 12px; border-top: 1px solid #EDF0F6; font-size: 13px; color: #3A4456">
+              <span style="display: inline-flex; align-items: center; gap: 6px">
+                <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <strong style="font-weight: 700; color: #0E1726">{{o.spots}}</strong>
+              </span>
+              <span style="display: inline-flex; align-items: center; gap: 6px">
+                <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2.5"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+                Apply by <strong style="font-weight: 700; color: #0E1726">{{o.deadline}}</strong>
+              </span>
+            </div>
+
+            <sc-if value="{{o.notShared}}" hint-placeholder-val="{{true}}">
+              <button onClick="{{o.share}}" style="height: 48px; border-radius: 12px; border: 0; background: #13235B; color: #FFFFFF; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 700">
+                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"></path></svg>
+                Share my profile
+              </button>
+            </sc-if>
+            <sc-if value="{{o.isShared}}" hint-placeholder-val="{{false}}">
+              <div role="status" style="height: 48px; box-sizing: border-box; border-radius: 12px; background: #E3F8EC; color: #067647; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 700">
+                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg>
+                <span>Profile shared with {{o.firstName}}</span>
+              </div>
+            </sc-if>
+          </article>
+        </sc-for>
+      </div>
+    </section>
+  </div>
+
+  <!-- Floating bottom nav (hidden when a phone frame draws its own fixed copy) -->
+  <sc-if value="{{showNav}}" hint-placeholder-val="{{true}}">
+  <nav aria-label="Main" style="position: absolute; z-index: 10; left: 16px; right: 16px; bottom: 28px; height: 68px; box-sizing: border-box; padding: 8px; border-radius: 999px; background: #13235B; box-shadow: 0 12px 28px rgba(19,35,91,0.30); display: flex; align-items: center; justify-content: space-between">
+    <a href="Main.dc.html" aria-label="Home" style="width: 52px; height: 52px; border-radius: 50%; color: #C9D2EC; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>
+    </a>
+    <a href="Timetable.dc.html" aria-label="Timetable" style="width: 52px; height: 52px; border-radius: 50%; color: #C9D2EC; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2.5"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+    </a>
+    <a href="Courses.dc.html" aria-label="Courses" style="width: 52px; height: 52px; border-radius: 50%; color: #C9D2EC; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"></path><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"></path></svg>
+    </a>
+    <a href="Chats.dc.html" aria-label="Chats, 12 unread" style="position: relative; width: 52px; height: 52px; border-radius: 50%; color: #C9D2EC; display: flex; align-items: center; justify-content: center">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      <span aria-hidden="true" style="position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; border-radius: 50%; background: #FF8A65; box-shadow: 0 0 0 2px #13235B"></span>
+    </a>
+    <a href="#" aria-current="page" style="height: 52px; padding: 0 16px; border-radius: 999px; background: #FFFFFF; color: #13235B; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700">
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+      Collab
+    </a>
+  </nav>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2229}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    // One card starts as already shared so both button states are visible.
+    this.state = { filter: 'All', shared: { an: true } };
+  }
+  renderVals() {
+    const TYPE = {
+      Project:   { bg: '#DCE4FF', fg: '#2448C9' },
+      Research:  { bg: '#C8F0D8', fg: '#067647' },
+      Hackathon: { bg: '#FCE7B4', fg: '#8A4B00' },
+      Startup:   { bg: '#FCE7F3', fg: '#9D174D' }
+    };
+    // The first three match the Collaboration activity feed on Home.
+    const ALL = [
+      { id: 'rs', type: 'Project', title: 'Smart Irrigation – EPI project', who: 'Riya Sharma', initials: 'RS', av: ['#FCD98A', '#5A3A00'],
+        whoMeta: 'B.Tech Civil | Year 3', posted: '35 min ago',
+        body: 'Building a low-cost soil-moisture system for the campus gardens. Looking for teammates comfortable with React Native and basic IoT. Demo review on 20 Nov.',
+        skills: ['React Native', 'IoT', 'Firebase'], spots: '2 of 4 spots open', deadline: '18 Nov' },
+      { id: 'iv', type: 'Research', title: 'Crop-yield prediction with ML', who: 'Ishaan Verma', initials: 'IV', av: ['#D1F0E4', '#065F46'],
+        whoMeta: 'M.Tech CSE | Faculty-guided', posted: '1h ago',
+        body: 'Semester-long research project with weekly reviews. Basic Python is a must; prior ML coursework is a plus.',
+        skills: ['Python', 'Pandas', 'ML basics'], spots: '3 openings', deadline: '22 Nov' },
+      { id: 'an', type: 'Hackathon', title: 'Inter-IIT Tech Meet: Robotics team', who: 'Ananya Nair', initials: 'AN', av: ['#E4E1FF', '#3B2F99'],
+        whoMeta: 'B.Tech ECE | Year 4', posted: '3h ago',
+        body: 'Forming a team for the robotics problem statement. Mechanical and embedded folks especially welcome.',
+        skills: ['Embedded C', 'ROS', 'CAD'], spots: '3 spots left', deadline: '15 Nov' },
+      { id: 'ar', type: 'Startup', title: 'Product designer for a campus food app', who: 'Arjun Rao', initials: 'AR', av: ['#FDE7E4', '#9A2A1A'],
+        whoMeta: 'B.Tech ME | Year 3', posted: 'Yesterday',
+        body: 'Early-stage student startup in the pre-incubation round. Need someone to own the app’s UX and visual design.',
+        skills: ['Figma', 'UX research', 'Prototyping'], spots: '1 spot open', deadline: '25 Nov' }
+    ];
+
+    const filter = this.state.filter;
+    const shared = this.state.shared;
+
+    const filters = ['All', 'Project', 'Research', 'Hackathon', 'Startup'].map((label) => {
+      const on = label === filter;
+      return {
+        label: label === 'All' ? 'All' : label + 's',
+        pressed: on ? 'true' : 'false',
+        bg: on ? '#13235B' : '#FFFFFF',
+        fg: on ? '#FFFFFF' : '#3A4456',
+        border: on ? '#13235B' : '#DDE2EE',
+        pick: () => this.setState({ filter: label })
+      };
+    });
+
+    const opps = ALL
+      .filter((o) => filter === 'All' || o.type === filter)
+      .map((o) => {
+        const isShared = !!shared[o.id];
+        return {
+          ...o,
+          tagBg: TYPE[o.type].bg, tagFg: TYPE[o.type].fg,
+          avBg: o.av[0], avFg: o.av[1],
+          firstName: o.who.split(' ')[0],
+          // Programme on line 2, year / role on line 3.
+          meta1: o.whoMeta.split(' | ')[0],
+          meta2: o.whoMeta.split(' | ')[1] || '',
+          isShared, notShared: !isShared,
+          share: () => this.setState({ shared: { ...this.state.shared, [o.id]: true } })
+        };
+      });
+
+    // Your posts (same as the Your posts screen); "New" only when there are new profiles
+    const MINE = [
+      { type: 'Project', title: 'Mess feedback app for hostels', posted: '2 days ago', due: '20 Nov', profiles: 4, fresh: 3, short: 1 },
+      { type: 'Others', title: 'Doubles partner for the inter-hostel badminton league', posted: '5 days ago', due: '18 Nov', profiles: 2, fresh: 2, short: 0 },
+      { type: 'Hackathon', title: 'Smart India Hackathon team (software track)', posted: '3 weeks ago', due: '30 Oct', profiles: 6, fresh: 0, short: 3, closed: true }
+    ];
+    const MTYPE = { Project: ['#DCE4FF', '#2448C9'], Hackathon: ['#FCE7B4', '#8A4B00'], Others: ['#EDF0F6', '#3A4456'], Research: ['#C8F0D8', '#067647'], Startup: ['#FCE7F3', '#9D174D'] };
+    // Only active posts show here; closed ones stay on the Your posts screen
+    const mine = MINE.filter((m) => !m.closed).map((m) => ({
+      ...m,
+      closed: !!m.closed,
+      meta: m.closed ? m.posted : 'Apply by ' + m.due,
+      tagBg: MTYPE[m.type][0], tagFg: MTYPE[m.type][1],
+      hasNew: m.fresh > 0,
+      cols: m.fresh > 0 ? 'repeat(3, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))'
+    }));
+    const active = this.state.mineIdx || 0;
+    const mineDots = mine.map((_, i) => ({ w: i === active ? '18px' : '6px', bg: i === active ? '#13235B' : '#C9D2EC' }));
+    const onMineScroll = (e) => {
+      const idx = Math.max(0, Math.min(mine.length - 1, Math.round(e.currentTarget.scrollLeft / 312)));
+      if (idx !== (this.state.mineIdx || 0)) this.setState({ mineIdx: idx });
+    };
+    return { filters, opps, openCount: ALL.length, showNav: !this.props.hideNav, respHref: this.props.respHref || 'Responses.dc.html', postHref: this.props.postHref || 'PostCollab.dc.html', postsHref: this.props.postsHref || 'MyPosts.dc.html', mine, mineDots, onMineScroll, mineCount: mine.length };
+  }
+}
+</script>
+</body>
+</html>

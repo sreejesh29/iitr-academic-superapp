@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Campus app – Noticeboard</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2448C9;text-decoration:none}a:hover{color:#16308F}
+button{font-family:inherit;cursor:pointer}
+textarea::placeholder{color:#697285}
+.hs{scrollbar-width:none}.hs::-webkit-scrollbar{display:none}
+@keyframes toastIn{from{transform:translateY(-6px);opacity:0}to{transform:none;opacity:1}}
+</style>
+</helmet>
+
+<div style="position: relative; width: 390px; min-height: {{minH}}; box-sizing: border-box; background: #F3F5FA; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #0E1726; display: flex; flex-direction: column; overflow-x: clip">
+
+  <!-- ===================== LIST ===================== -->
+  <sc-if value="{{isList}}" hint-placeholder-val="{{true}}">
+    <header style="position: sticky; top: 0; z-index: 0; background: #13235B; padding: 16px 16px 64px; display: flex; flex-direction: column; gap: 16px; color: #FFFFFF">
+      <div style="display: flex; align-items: center; gap: 8px">
+        <a href="{{backHref}}" aria-label="Back to Home" style="width: 44px; height: 44px; border-radius: 14px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+        </a>
+        <div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0">
+          <h1 style="margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.3">Noticeboard</h1>
+          <span style="font-size: 12px; color: #C9D2EC">{{total}} notices</span>
+        </div>
+      </div>
+    </header>
+
+    <div style="position: relative; z-index: 1; margin-top: -28px; flex: 1; background: #F3F5FA; border-radius: 28px 28px 0 0; padding: 10px 0 40px; box-shadow: 0 -10px 30px rgba(14,23,38,0.22); display: flex; flex-direction: column; gap: 16px">
+      <div aria-hidden="true" style="width: 40px; height: 5px; margin: 0 auto; border-radius: 3px; background: #C9D2EC"></div>
+
+      <!-- Filter: type -->
+      <div role="group" aria-label="Filter by type" class="hs" style="display: flex; gap: 8px; overflow-x: auto; padding: 0 16px">
+        <sc-for list="{{typeChips}}" as="f" hint-placeholder-count="6">
+          <button type="button" onClick="{{f.pick}}" aria-pressed="{{f.pressed}}" style="flex-shrink: 0; height: 34px; padding: 0 14px; border-radius: 999px; border: {{f.border}}; background: {{f.bg}}; color: {{f.fg}}; font-size: 13px; font-weight: 700">{{f.label}}</button>
+        </sc-for>
+      </div>
+
+      <!-- Filter: sender + sort -->
+      <div style="margin: 0 16px; display: flex; gap: 8px">
+        <button type="button" onClick="{{toggleSenderMenu}}" aria-expanded="{{senderMenuOpen}}" style="flex: 1; min-width: 0; height: 40px; padding: 0 12px; border-radius: 999px; border: {{senderBorder}}; background: #FFFFFF; color: #0E1726; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; text-align: left">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B6577" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>
+          <span style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{senderLabel}}</span>
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B6577" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; transform: {{senderChevron}}"><path d="m6 9 6 6 6-6"></path></svg>
+        </button>
+        <button type="button" onClick="{{toggleSort}}" aria-label="{{sortAria}}" style="flex-shrink: 0; height: 40px; padding: 0 12px; border-radius: 999px; border: 1px solid #E3E7F0; background: #FFFFFF; color: #0E1726; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"></path></svg>
+          {{sortLabel}}
+        </button>
+      </div>
+
+      <sc-if value="{{senderMenuOpen}}" hint-placeholder-val="{{false}}">
+        <ul role="listbox" aria-label="Sender" style="margin: -8px 16px 0; padding: 6px; list-style: none; background: #FFFFFF; border: 1px solid #E3E7F0; border-radius: 16px; box-shadow: 0 12px 28px rgba(14,23,38,0.10); display: flex; flex-direction: column">
+          <sc-for list="{{senders}}" as="s" hint-placeholder-count="5">
+            <li role="option" aria-selected="{{s.selected}}" onClick="{{s.pick}}" style="padding: 10px 12px; border-radius: 10px; background: {{s.bg}}; display: flex; align-items: center; gap: 10px; cursor: pointer">
+              <span style="flex: 1; font-size: 14px; font-weight: {{s.weight}}; color: #0E1726">{{s.label}}</span>
+              <span style="font-size: 12px; color: #5B6577">{{s.count}}</span>
+              <sc-if value="{{s.isOn}}" hint-placeholder-val="{{false}}">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#13235B" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg>
+              </sc-if>
+            </li>
+          </sc-for>
+        </ul>
+      </sc-if>
+
+      <div style="margin: 0 16px -8px; display: flex; align-items: center; justify-content: space-between; gap: 8px">
+        <span style="font-size: 13px; font-weight: 600; color: #5B6577">{{countLabel}}</span>
+        <sc-if value="{{isFiltered}}" hint-placeholder-val="{{false}}">
+          <button type="button" onClick="{{clearFilters}}" style="height: 28px; padding: 0 4px; border: 0; background: transparent; color: #2448C9; font-size: 13px; font-weight: 700">Clear filters</button>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{noResults}}" hint-placeholder-val="{{false}}">
+        <p style="margin: 0 16px; padding: 20px 16px; border-radius: 20px; background: #FFFFFF; border: 1px solid #E3E7F0; font-size: 14px; color: #3A4456; text-align: center">No notices match these filters.</p>
+      </sc-if>
+
+      <!-- Notices, grouped by day -->
+      <sc-for list="{{days}}" as="g" hint-placeholder-count="3">
+        <section aria-label="Notices" style="margin: 0 16px; display: flex; flex-direction: column; gap: 10px">
+          <sc-for list="{{g.items}}" as="n" hint-placeholder-count="2">
+            <article style="background: #FFFFFF; border: 1px solid #E3E7F0; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+              <a href="#" onClick="{{n.open}}" style="display: flex; flex-direction: column; gap: 8px; color: #0E1726">
+                <span style="display: flex; align-items: center; gap: 6px">
+                  <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: {{n.chipBg}}; color: {{n.chipFg}}">{{n.type}}</span>
+                  <sc-if value="{{n.external}}" hint-placeholder-val="{{false}}">
+                    <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: #EDF0F6; color: #3A4456">External</span>
+                  </sc-if>
+                  <span style="flex: 1"></span>
+                  <span style="flex-shrink: 0; font-size: 12px; color: #5B6577">{{n.time}}</span>
+                </span>
+                <span style="font-size: 15px; font-weight: 700; line-height: 1.4">{{n.title}}</span>
+                <span style="font-size: 12px; color: #5B6577">{{n.sender}}</span>
+              </a>
+
+              <!-- Intra-campus calls can be applied to right here -->
+              <sc-if value="{{n.canApply}}" hint-placeholder-val="{{false}}">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-top: 10px; border-top: 1px solid #EDF0F6">
+                  <span style="font-size: 12px; font-weight: 600; color: {{n.deadlineInk}}">{{n.deadline}}</span>
+                  <sc-if value="{{n.notApplied}}" hint-placeholder-val="{{true}}">
+                    <button type="button" onClick="{{n.apply}}" style="flex-shrink: 0; height: 36px; padding: 0 18px; border-radius: 10px; border: 0; background: #13235B; color: #FFFFFF; font-size: 13px; font-weight: 700">Apply</button>
+                  </sc-if>
+                  <sc-if value="{{n.isApplied}}" hint-placeholder-val="{{false}}">
+                    <span style="flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 10px; background: #E3F8EC; color: #067647; font-size: 13px; font-weight: 700">
+                      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg>
+                      Applied
+                    </span>
+                  </sc-if>
+                </div>
+              </sc-if>
+            </article>
+          </sc-for>
+        </section>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- ===================== DETAIL ===================== -->
+  <sc-if value="{{isDetail}}" hint-placeholder-val="{{false}}">
+    <header style="position: sticky; top: 0; z-index: 0; background: #13235B; padding: 16px 16px 64px; display: flex; flex-direction: column; gap: 16px; color: #FFFFFF">
+      <div style="display: flex; align-items: center; gap: 8px">
+        <a href="{{d.backHref}}" onClick="{{d.back}}" aria-label="Back to noticeboard" style="width: 44px; height: 44px; border-radius: 14px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+        </a>
+        <div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0">
+          <h1 style="margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis" title="{{d.title}}">{{d.title}}</h1>
+          <span style="font-size: 12px; color: #C9D2EC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{d.type}}</span>
+        </div>
+      </div>
+    </header>
+
+    <div style="position: relative; z-index: 1; margin-top: -28px; flex: 1; background: #F3F5FA; border-radius: 28px 28px 0 0; padding: 10px 16px 40px; box-shadow: 0 -10px 30px rgba(14,23,38,0.22); display: flex; flex-direction: column; gap: 20px">
+      <div aria-hidden="true" style="width: 40px; height: 5px; margin: 0 auto -6px; border-radius: 3px; background: #C9D2EC"></div>
+
+      <article style="background: #FFFFFF; border: 1px solid #E3E7F0; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+        <span style="display: flex; align-items: center; gap: 6px">
+          <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: {{d.chipBg}}; color: {{d.chipFg}}">{{d.type}}</span>
+          <sc-if value="{{d.external}}" hint-placeholder-val="{{false}}">
+            <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: #EDF0F6; color: #3A4456">External</span>
+          </sc-if>
+        </span>
+        <h2 style="margin: 0; font-size: 19px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.35">{{d.title}}</h2>
+        <div style="display: flex; align-items: center; gap: 10px">
+          <span aria-hidden="true" style="width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; background: #13235B; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">{{d.initials}}</span>
+          <span style="display: flex; flex-direction: column; gap: 1px">
+            <span style="font-size: 14px; font-weight: 700">{{d.sender}}</span>
+            <span style="font-size: 12px; color: #5B6577">{{d.postedLabel}}</span>
+          </span>
+        </div>
+        <sc-for list="{{d.paras}}" as="p" hint-placeholder-count="2">
+          <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #3A4456">{{p}}</p>
+        </sc-for>
+
+        <sc-if value="{{d.hasFacts}}" hint-placeholder-val="{{false}}">
+          <dl style="margin: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px">
+            <sc-for list="{{d.facts}}" as="f" hint-placeholder-count="2">
+              <div style="padding: 10px 12px; border-radius: 12px; background: #F7F8FB; display: flex; flex-direction: column; gap: 2px; min-width: 0">
+                <dt style="font-size: 12px; font-weight: 600; color: #5B6577">{{f.k}}</dt>
+                <dd style="margin: 0; font-size: 13px; font-weight: 700; color: #0E1726">{{f.v}}</dd>
+              </div>
+            </sc-for>
+          </dl>
+        </sc-if>
+
+        <sc-if value="{{d.hasFile}}" hint-placeholder-val="{{false}}">
+          <a href="#" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: #F3F5FA; color: #0E1726">
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+              <span style="font-size: 13px; font-weight: 600">{{d.file}}</span>
+              <span style="font-size: 12px; color: #5B6577">{{d.fileMeta}}</span>
+            </span>
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B6577" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg>
+          </a>
+        </sc-if>
+      </article>
+
+      <!-- External calls: no in-app apply -->
+      <sc-if value="{{d.external}}" hint-placeholder-val="{{false}}">
+        <div style="display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 20px; background: #FFFFFF; border: 1px solid #E3E7F0">
+          <span style="font-size: 13px; line-height: 1.5; color: #3A4456">This opportunity is run outside the campus, so applications happen on the organiser’s website.</span>
+          <a href="#" style="height: 44px; border-radius: 12px; border: 1px solid #E3E7F0; background: #FFFFFF; color: #13235B; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px">
+            Open organiser’s page
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4 10 14M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"></path></svg>
+          </a>
+        </div>
+      </sc-if>
+
+      <!-- Intra-campus call: apply -->
+      <sc-if value="{{d.canApply}}" hint-placeholder-val="{{false}}">
+        <section aria-labelledby="ap-h" style="display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <h2 id="ap-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Apply</h2>
+            <span style="font-size: 13px; color: {{d.deadlineInk}}">{{d.deadline}}</span>
+          </div>
+
+          <sc-if value="{{d.isApplied}}" hint-placeholder-val="{{false}}">
+            <div style="display: flex; flex-direction: column; gap: 14px; padding: 16px; border-radius: 20px; background: #FFFFFF; border: 1px solid #E3E7F0; animation: toastIn 0.3s ease-out">
+              <div style="display: flex; align-items: center; gap: 12px">
+                <span aria-hidden="true" style="width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%; background: #12893F; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg>
+                </span>
+                <span style="display: flex; flex-direction: column; gap: 2px">
+                  <span style="font-size: 15px; font-weight: 700">Application sent</span>
+                  <span style="font-size: 13px; line-height: 1.45; color: #5B6577">Your application is under review</span>
+                </span>
+              </div>
+              <button type="button" onClick="{{d.withdraw}}" style="width: 100%; height: 44px; padding: 0 12px; border-radius: 12px; border: 1px solid #F4C7C2; background: #FFFFFF; color: #B42318; font-size: 13px; font-weight: 700">Withdraw application</button>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{d.showForm}}" hint-placeholder-val="{{true}}">
+            <div style="display: flex; flex-direction: column; gap: 14px; padding: 16px; border-radius: 20px; background: #FFFFFF; border: 1px solid #E3E7F0">
+              <div style="display: flex; flex-direction: column; gap: 8px">
+                <span style="font-size: 13px; font-weight: 700; color: #3A4456">Shared with {{d.sender}}</span>
+                <div style="display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 14px; background: #F7F8FB">
+                  <span style="position: relative; display: block; width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; overflow: hidden; background: #DCE4FF;"><img src="/_blob/d380e2b78f28a976382d51f88b9181ac" alt="" style="position: absolute; left: -205%; top: -46%; height: 300%; width: auto; max-width: none"></span>
+                  <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px">
+                    <span style="font-size: 14px; font-weight: 700">Aarav Mehta</span>
+                    <span style="font-size: 12px; color: #5B6577">23114012 | B.Tech CSE | Sem 5</span>
+                  </span>
+                </div>
+              </div>
+              <label style="display: flex; flex-direction: column; gap: 6px">
+                <span style="font-size: 13px; font-weight: 700; color: #3A4456">{{d.question}} <span style="font-weight: 500; color: #5B6577">(optional)</span></span>
+                <textarea rows="3" placeholder="{{d.placeholder}}" style="box-sizing: border-box; width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid #E3E7F0; background: #F7F8FB; font-family: inherit; font-size: 14px; line-height: 1.5; color: #0E1726; resize: none; outline: none"></textarea>
+              </label>
+              <button type="button" onClick="{{d.submit}}" style="height: 48px; border-radius: 12px; border: 0; background: #13235B; color: #FFFFFF; font-size: 15px; font-weight: 700">Submit application</button>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{d.showStart}}" hint-placeholder-val="{{false}}">
+            <button type="button" onClick="{{d.startApply}}" style="height: 48px; border-radius: 12px; border: 0; background: #13235B; color: #FFFFFF; font-size: 15px; font-weight: 700">Apply</button>
+          </sc-if>
+        </section>
+      </sc-if>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"open":{"editor":"enum","options":["","midsem","volunteer","water","coding","study","feedback","trials","fellowship","library"],"default":""},"applyOpen":{"editor":"boolean","default":false},"$preview":{"width":390,"height":1697}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { open: undefined, form: null, type: 'All', sender: 'All', sort: 'newest', senderMenu: false, applied: {}, withdrawn: {} };
+  }
+  renderVals() {
+    const S = this.state;
+    const P = this.props;
+
+    // Today is Mon 9 Nov, 10:20. `at` orders notices (higher = newer).
+    const TYPE = {
+      Academic:  ['#EEF2FF', '#2448C9'],
+      Events:    ['#FCE7F3', '#9D174D'],
+      Clubs:     ['#EDE9FE', '#5B21B6'],
+      Research:  ['#E0F2FE', '#075985'],
+      Sports:    ['#FFF4DB', '#8A4B00'],
+      Hostel:    ['#DCFAE6', '#067647'],
+      Placement: ['#E6EBF7', '#3A4456']
+    };
+    const N = [
+      { id: 'midsem', type: 'Academic', sender: 'Academic Affairs', initials: 'AA', at: 9, day: 'Today', time: '2h ago', posted: 'today, 08:20', unread: true,
+        title: 'Mid-semester exam timetable published for all B.Tech programmes',
+        paras: ['The mid-semester exams run from 23 to 28 Nov. Check your slot and hall in the attached timetable.', 'Clashes must be reported to the Academic Affairs office by 13 Nov.'],
+        file: 'Midsem timetable – Autumn 2026.pdf', fileMeta: '640 KB' },
+      { id: 'volunteer', type: 'Events', sender: 'Cultural Council', initials: 'CC', at: 8, day: 'Today', time: '5h ago', posted: 'today, 05:20', unread: true,
+        title: 'Volunteer registrations for the cultural fest close this Friday',
+        paras: ['We need volunteers for hospitality, stage management and logistics across the three fest days.', 'Volunteers get a certificate and a fest pass.'],
+        call: true, deadline: 'Apply by 13 Nov', facts: [['Commitment', '3 days, 4h shifts'], ['Open to', 'All years']],
+        question: 'Which team would you like?', placeholder: 'Hospitality, stage or logistics' },
+      { id: 'water', type: 'Hostel', sender: 'Hostel Office', initials: 'HO', at: 7, day: 'Today', time: '8h ago', posted: 'today, 02:20', unread: false,
+        title: 'Water supply maintenance tomorrow, 10 AM – 2 PM',
+        paras: ['Water supply in Rajendra, Govind and Cautley Bhawans will be off during the maintenance window. Please store water in advance.'] },
+      { id: 'coding', type: 'Clubs', sender: 'Programming & Algorithms Club', initials: 'PA', at: 6, day: 'Yesterday', time: '18:30', posted: 'yesterday, 18:30', unread: true,
+        title: 'Recruitment for first and second years is open',
+        paras: ['Join the club to work on competitive programming, open-source projects and weekly workshops.', 'Shortlisted students take a short coding round on 18 Nov.'],
+        call: true, deadline: 'Apply by 14 Nov', facts: [['Open to', '1st & 2nd year'], ['Next step', 'Coding round, 18 Nov']],
+        question: 'Why do you want to join?', placeholder: 'A line or two about what you would like to work on' },
+      { id: 'study', type: 'Research', sender: 'Dept. of Humanities & Social Sciences', initials: 'HS', at: 5, day: 'Yesterday', time: '11:00', posted: 'yesterday, 11:00', unread: true,
+        title: 'Participants needed for a study on sleep and screen time',
+        paras: ['A 30-minute survey and a one-week sleep diary. Your responses stay anonymous.', 'Participants receive a certificate and a ₹300 honorarium.'],
+        call: true, deadline: 'Apply by 20 Nov', facts: [['Time needed', '30 min + 1 week diary'], ['Open to', 'All students']],
+        question: 'Anything we should know?', placeholder: 'For example, preferred survey slot' },
+      { id: 'feedback', type: 'Academic', sender: 'Academic Affairs', initials: 'AA', at: 4, day: 'Sat, 7 Nov', time: '16:00', posted: '7 Nov, 16:00', unread: false,
+        title: 'Course feedback forms are open until 15 Nov',
+        paras: ['Fill in feedback for every registered course. Grades are released only after feedback is submitted.'] },
+      { id: 'trials', type: 'Sports', sender: 'Sports Council', initials: 'SC', at: 3, day: 'Fri, 6 Nov', time: '12:15', posted: '6 Nov, 12:15', unread: false,
+        title: 'Inter-bhawan football trials this Saturday',
+        paras: ['Trials for the inter-bhawan football league are on Saturday, 14 Nov, at the main ground from 7 AM.'],
+        call: true, deadline: 'Apply by 12 Nov', facts: [['When', 'Sat 14 Nov, 7 AM'], ['Where', 'Main ground']],
+        question: 'Preferred position', placeholder: 'For example, midfield', preApplied: '6 Nov, 14:02' },
+      { id: 'fellowship', type: 'Placement', sender: 'Training & Placement Cell', initials: 'TP', at: 2, day: 'Thu, 5 Nov', time: '17:40', posted: '5 Nov, 17:40', unread: false,
+        title: 'Summer research fellowship at a partner institute',
+        paras: ['An eight-week summer research fellowship hosted by a partner institute. Applications are handled on their portal.'],
+        call: true, external: true, deadline: 'Closes 30 Nov', facts: [['Duration', '8 weeks, May–July'], ['Stipend', '₹15,000 / month']] },
+      { id: 'library', type: 'Academic', sender: 'Central Library', initials: 'CL', at: 1, day: 'Wed, 4 Nov', time: '09:00', posted: '4 Nov, 09:00', unread: false,
+        title: 'Library open till 2 AM during mid-semester exams',
+        paras: ['From 20 to 28 Nov the reading hall stays open until 2 AM. Carry your ID card after 10 PM.'] }
+    ];
+
+    const appliedAt = (n) => {
+      if (S.withdrawn[n.id]) return null;
+      return S.applied[n.id] || n.preApplied || null;
+    };
+
+    // ---------- Navigation ----------
+    const current = S.open !== undefined ? S.open : (P.open || '');
+    const internal = S.open !== undefined || !P.open;
+    const go = (id, form) => (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ open: id, form: form ? id : null, senderMenu: false }); };
+
+    // ---------- List ----------
+    const filtered = N
+      .filter((n) => S.type === 'All' || n.type === S.type)
+      .filter((n) => S.sender === 'All' || n.sender === S.sender)
+      .sort((a, b) => (S.sort === 'oldest' ? a.at - b.at : b.at - a.at));
+
+    // One flat list (no day headings); older cards carry their date in the time slot.
+    const g = { items: [] };
+    const days = filtered.length ? [g] : [];
+    const stamp = (n) => n.day === 'Today' ? n.time : n.day === 'Yesterday' ? 'Yesterday, ' + n.time : n.day.split(', ')[1] + ', ' + n.time;
+    filtered.forEach((n) => {
+      const ap = appliedAt(n);
+      g.items.push({
+        ...n,
+        time: stamp(n),
+        chipBg: TYPE[n.type][0], chipFg: TYPE[n.type][1],
+        external: !!n.external,
+        canApply: !!n.call && !n.external,
+        isApplied: !!ap, notApplied: !ap,
+        // Apply-by date always reads the same; the Applied badge carries the status.
+        deadlineInk: '#8A4B00',
+        deadline: n.deadline,
+        open: go(n.id, false),
+        apply: go(n.id, true)
+      });
+    });
+
+    const typeChips = ['All', ...Object.keys(TYPE)].map((k) => {
+      const on = k === S.type;
+      return {
+        label: k, pressed: on ? 'true' : 'false',
+        bg: on ? '#13235B' : '#FFFFFF', fg: on ? '#FFFFFF' : '#3A4456',
+        border: on ? '1px solid #13235B' : '1px solid #E3E7F0',
+        pick: () => this.setState({ type: k })
+      };
+    });
+    const senderNames = [...new Set(N.map((n) => n.sender))];
+    const senders = ['All', ...senderNames].map((k) => {
+      const on = k === S.sender;
+      return {
+        label: k === 'All' ? 'All senders' : k,
+        count: k === 'All' ? N.length : N.filter((n) => n.sender === k).length,
+        selected: on ? 'true' : 'false', isOn: on,
+        bg: on ? '#F3F5FA' : 'transparent', weight: on ? 700 : 500,
+        pick: () => this.setState({ sender: k, senderMenu: false })
+      };
+    });
+    const isFiltered = S.type !== 'All' || S.sender !== 'All';
+    const openCalls = N.filter((n) => n.call && !n.external);
+
+    // ---------- Detail ----------
+    let d = { paras: [], facts: [] };
+    if (current) {
+      const n = N.find((x) => x.id === current);
+      const ap = appliedAt(n);
+      const canApply = !!n.call && !n.external;
+      const formOn = S.form === n.id || (!internal && !!P.applyOpen && S.form === null);
+      d = {
+        ...n,
+        postedLabel: n.posted.charAt(0).toUpperCase() + n.posted.slice(1),
+        chipBg: TYPE[n.type][0], chipFg: TYPE[n.type][1],
+        external: !!n.external,
+        facts: (n.facts || []).map((f) => ({ k: f[0], v: f[1] })),
+        hasFacts: !!n.facts,
+        hasFile: !!n.file,
+        canApply,
+        isApplied: canApply && !!ap,
+        appliedAt: ap || '',
+        showForm: canApply && !ap && formOn,
+        showStart: canApply && !ap && !formOn,
+        deadlineInk: '#8A4B00',
+        startApply: () => this.setState({ form: n.id }),
+        submit: () => this.setState({ applied: { ...S.applied, [n.id]: '9 Nov, 10:20' }, withdrawn: { ...S.withdrawn, [n.id]: false }, form: null }),
+        withdraw: () => this.setState({ withdrawn: { ...S.withdrawn, [n.id]: true }, applied: { ...S.applied, [n.id]: null }, form: null }),
+        backHref: internal ? '#' : (P.listHref || 'Noticeboard.dc.html'),
+        back: (e) => { if (!internal) return; if (e && e.preventDefault) e.preventDefault(); this.setState({ open: '', form: null }); }
+      };
+    }
+
+    return {
+      isList: !current, isDetail: !!current,
+      total: N.length, unread: N.filter((n) => n.unread).length,
+      tiles: [
+        { label: 'Unread', n: N.filter((n) => n.unread).length },
+        { label: 'Open calls', n: openCalls.length },
+        { label: 'Applied', n: openCalls.filter((n) => appliedAt(n)).length }
+      ],
+      typeChips, senders,
+      senderMenuOpen: S.senderMenu,
+      senderLabel: S.sender === 'All' ? 'All senders' : S.sender,
+      senderBorder: S.sender === 'All' ? '1px solid #E3E7F0' : '1.5px solid #13235B',
+      senderChevron: S.senderMenu ? 'rotate(180deg)' : 'none',
+      toggleSenderMenu: () => this.setState({ senderMenu: !S.senderMenu }),
+      sortLabel: S.sort === 'oldest' ? 'Oldest first' : 'Newest first',
+      sortAria: 'Sorted ' + (S.sort === 'oldest' ? 'oldest first' : 'newest first') + '. Tap to reverse.',
+      toggleSort: () => this.setState({ sort: S.sort === 'oldest' ? 'newest' : 'oldest' }),
+      days,
+      countLabel: filtered.length + (filtered.length === 1 ? ' notice' : ' notices'),
+      noResults: filtered.length === 0,
+      isFiltered,
+      clearFilters: () => this.setState({ type: 'All', sender: 'All', senderMenu: false }),
+      d,
+      backHref: P.backHref || 'Main.dc.html',
+      minH: P.minH || '844px'
+    };
+  }
+}
+</script>
+</body>
+</html>

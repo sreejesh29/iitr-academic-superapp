@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Campus app – Manage responses</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2448C9;text-decoration:none}a:hover{color:#16308F}
+.hscroll{scrollbar-width:none}.hscroll::-webkit-scrollbar{display:none}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+
+<div style="position: relative; width: 390px; min-height: 844px; box-sizing: border-box; background: #F3F5FA; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #0E1726; display: flex; flex-direction: column; overflow-x: clip">
+
+  <!-- Header: solid navy, stays put -->
+  
+
+  <!-- Content sheet -->
+  <header style="position: sticky; top: 0; z-index: 0; background: #13235B; padding: 16px 16px 64px; display: flex; flex-direction: column; gap: 16px; color: #FFFFFF">
+    <div style="display: flex; align-items: center; gap: 8px">
+      <a href="{{backHref}}" aria-label="Back to your posts" style="width: 44px; height: 44px; border-radius: 14px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+      </a>
+      <div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0">
+        
+        <h1 style="margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.3">Mess feedback app for hostels</h1><span style="font-size: 12px; color: #C9D2EC">Responses to your post</span>
+      </div>
+      <button type="button" onClick="{{toggleMenu}}" aria-label="Post options" aria-haspopup="menu" aria-expanded="{{menuExpanded}}" style="width: 44px; height: 44px; border-radius: 14px; border: 0; background: transparent; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="12" cy="19" r="1.8"></circle></svg>
+      </button>
+    </div>
+
+    <!-- Summary -->
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+      <div style="padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.12); display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 12px; color: #C9D2EC">Profiles</span>
+        <span style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px">{{counts.all}}</span>
+      </div>
+      <div style="padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.12); display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 12px; color: #C9D2EC">New</span>
+        <span style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px">{{counts.new}}</span>
+      </div>
+      <div style="padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.12); display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 12px; color: #C9D2EC">Shortlisted</span>
+        <span style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px">{{counts.short}}</span>
+      </div>
+    </div>
+
+    <!-- Close / reopen the post -->
+    <sc-if value="{{isOpenPost}}" hint-placeholder-val="{{true}}">
+      <button onClick="{{closePost}}" style="height: 48px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.4); background: transparent; color: #FFFFFF; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 700">
+        
+        <span>Stop accepting profiles</span>
+      </button>
+    </sc-if>
+    <sc-if value="{{isClosed}}" hint-placeholder-val="{{false}}">
+      <button onClick="{{reopenPost}}" style="height: 48px; border-radius: 14px; border: 0; background: #FFFFFF; color: #13235B; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 700">
+        Reopen post
+      </button>
+    </sc-if>
+  </header><div style="position: relative; z-index: 1; margin-top: -28px; flex: 1; background: #F3F5FA; border-radius: 28px 28px 0 0; padding: 10px 0 40px; box-shadow: 0 -10px 30px rgba(14,23,38,0.22)">
+    <div aria-hidden="true" style="width: 40px; height: 5px; margin: 0 auto; border-radius: 3px; background: #C9D2EC"></div>
+
+    <!-- Deleted: the post and its responses are gone -->
+    <sc-if value="{{isDeleted}}" hint-placeholder-val="{{false}}">
+      <div role="status" style="margin: 40px 24px 0; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center">
+        <span aria-hidden="true" style="width: 64px; height: 64px; border-radius: 50%; background: #FDE7E4; color: #B42318; display: flex; align-items: center; justify-content: center">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"></path></svg>
+        </span>
+        <h2 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.3px">Post deleted</h2>
+        <span style="font-size: 14px; line-height: 1.5; color: #5B6577">It’s been removed from the Collaboration feed, and the students who shared their profiles can no longer see it.</span>
+        <a href="{{backHref}}" style="align-self: stretch; margin-top: 8px; height: 48px; border-radius: 14px; background: #13235B; color: #FFFFFF; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center">Back to your posts</a>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{notDeleted}}" hint-placeholder-val="{{true}}">
+    <sc-if value="{{isClosed}}" hint-placeholder-val="{{false}}">
+      <p role="status" style="margin: 18px 16px 0; display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 14px; background: #FFF4DB; border: 1px solid #F8DFA6; font-size: 13px; line-height: 1.45; color: #4A2800">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A4B00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+        <span><strong style="font-weight: 700">Post closed.</strong> It's hidden from the Collaboration feed and no new profiles can be shared. You can still contact and shortlist the students below.</span>
+      </p>
+    </sc-if>
+
+    <section aria-labelledby="resp-h" style="margin-top: 18px; display: flex; flex-direction: column; gap: 12px">
+      <div style="margin: 0 16px; display: flex; flex-direction: column; gap: 2px">
+        <h2 id="resp-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Shared profiles</h2>
+        <span style="font-size: 13px; color: #5B6577">Contact students directly or shortlist them</span>
+      </div>
+
+      <div role="group" aria-label="Filter profiles" class="hscroll" style="display: flex; gap: 8px; overflow-x: auto; padding: 0 16px 2px">
+        <sc-for list="{{filters}}" as="f" hint-placeholder-count="3">
+          <button onClick="{{f.pick}}" aria-pressed="{{f.pressed}}" style="flex-shrink: 0; height: 36px; padding: 0 14px; border-radius: 999px; font-size: 13px; font-weight: 600; border: 1px solid {{f.border}}; background: {{f.bg}}; color: {{f.fg}}">{{f.label}}</button>
+        </sc-for>
+      </div>
+
+      <div style="margin: 0 16px; display: flex; flex-direction: column; gap: 12px">
+        <sc-for list="{{people}}" as="p" hint-placeholder-count="4">
+          <article aria-label="{{p.name}}" style="background: #FFFFFF; border: 1px solid #E3E7F0; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+
+            <!-- Identity -->
+            <div style="display: flex; align-items: flex-start; gap: 10px">
+              <span aria-hidden="true" style="width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; background: {{p.avBg}}; color: {{p.avFg}}; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">{{p.initials}}</span>
+              <div style="flex: 1; min-width: 0; height: 36px; display: flex; flex-direction: column; justify-content: center; gap: 2px">
+                <span style="font-size: 14px; line-height: 1.25; font-weight: 700">{{p.name}}</span>
+                <span style="font-size: 12px; line-height: 1.25; color: #5B6577">{{p.programme}}</span>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0">
+                <sc-if value="{{p.isNew}}" hint-placeholder-val="{{false}}">
+                  <span style="font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: #2F5BEA; color: #FFFFFF">New</span>
+                </sc-if>
+                <sc-if value="{{p.isShort}}" hint-placeholder-val="{{false}}">
+                  <span style="font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: #E3F8EC; color: #067647">Shortlisted</span>
+                </sc-if>
+                <span style="font-size: 12px; color: #5B6577">{{p.sharedAt}}</span>
+              </div>
+            </div>
+
+            <!-- Basic details -->
+            <dl style="margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; padding: 12px; border-radius: 12px; background: #F7F8FB">
+              <div style="display: flex; flex-direction: column; gap: 2px">
+                <dt style="font-size: 11px; font-weight: 600; color: #5B6577">Department</dt>
+                <dd style="margin: 0; font-size: 13px; font-weight: 700">{{p.dept}}</dd>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 2px">
+                <dt style="font-size: 11px; font-weight: 600; color: #5B6577">Year</dt>
+                <dd style="margin: 0; font-size: 13px; font-weight: 700">{{p.yearShort}}</dd>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 2px">
+                <dt style="font-size: 11px; font-weight: 600; color: #5B6577">Enrolment no.</dt>
+                <dd style="margin: 0; font-size: 13px; font-weight: 700">{{p.enrol}}</dd>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 2px">
+                <dt style="font-size: 11px; font-weight: 600; color: #5B6577">CGPA</dt>
+                <dd style="margin: 0; font-size: 13px; font-weight: 700">{{p.cgpa}}</dd>
+              </div>
+            </dl>
+
+            <!-- Contact -->
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <h3 style="margin: 0; font-size: 13px; font-weight: 700">Contact</h3>
+              <div style="display: flex; align-items: center; gap: 10px">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B6577" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg>
+                <span style="flex: 1; min-width: 0; font-size: 13px; color: #0E1726; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{p.email}}</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B6577" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"></path></svg>
+                <span style="flex: 1; font-size: 13px; color: #0E1726">{{p.phone}}</span>
+              </div>
+            </div>
+
+            <!-- Experience (expandable) -->
+            <sc-if value="{{p.open}}" hint-placeholder-val="{{false}}">
+              <div style="display: flex; flex-direction: column; gap: 12px; padding-top: 12px; border-top: 1px solid #EDF0F6">
+                <sc-for list="{{p.sections}}" as="sec" hint-placeholder-count="3">
+                  <div style="display: flex; flex-direction: column; gap: 6px">
+                    <h3 style="margin: 0; font-size: 13px; font-weight: 700">{{sec.title}}</h3>
+                    <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px">
+                      <sc-for list="{{sec.items}}" as="it" hint-placeholder-count="2">
+                        <li style="display: flex; flex-direction: column; gap: 1px; padding: 8px 10px; border-radius: 10px; background: #F7F8FB">
+                          <span style="font-size: 13px; font-weight: 600; color: #0E1726">{{it.a}}</span>
+                          <span style="font-size: 12px; color: #5B6577">{{it.b}}</span>
+                        </li>
+                      </sc-for>
+                    </ul>
+                  </div>
+                </sc-for>
+                <ul aria-label="Skills" style="margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px">
+                  <sc-for list="{{p.skills}}" as="s" hint-placeholder-count="3">
+                    <li style="font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 6px; background: #EEF2FF; color: #2448C9">{{s}}</li>
+                  </sc-for>
+                </ul>
+              </div>
+            </sc-if>
+
+            <button onClick="{{p.toggle}}" aria-expanded="{{p.expanded}}" style="align-self: flex-start; height: 36px; padding: 0; border: 0; background: transparent; color: #2448C9; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px">
+              {{p.toggleLabel}}
+              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="{{p.chev}}"></path></svg>
+            </button>
+
+            <!-- Actions -->
+            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+              <a href="#" aria-label="Email {{p.name}}" style="height: 44px; border-radius: 12px; background: #F3F5FA; color: #13235B; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: 700">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg>
+                Email
+              </a>
+              <a href="#" aria-label="Call {{p.name}}" style="height: 44px; border-radius: 12px; background: #F3F5FA; color: #13235B; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: 700">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"></path></svg>
+                Call
+              </a>
+              <button onClick="{{p.shortlist}}" aria-pressed="{{p.pressed}}" style="height: 44px; border-radius: 12px; border: 0; background: {{p.slBg}}; color: {{p.slFg}}; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: 700">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="{{p.starFill}}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3l-5.5 2.9 1-6.2L3 9.6l6.2-.9z"></path></svg>
+                {{p.slLabel}}
+              </button>
+            </div>
+          </article>
+        </sc-for>
+      </div>
+    </section>
+    </sc-if>
+  </div>
+
+  <!-- Options menu from the ⋮ button -->
+  <sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}">
+    <div role="menu" aria-label="Post options" style="position: absolute; z-index: 20; top: 60px; right: 16px; width: 200px; padding: 6px; border-radius: 14px; background: #FFFFFF; border: 1px solid #E3E7F0; box-shadow: 0 12px 28px rgba(14,23,38,0.18)">
+      <button type="button" role="menuitem" onClick="{{askDelete}}" style="width: 100%; height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; color: #B42318; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 10px; text-align: left">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"></path></svg>
+        Delete post
+      </button>
+    </div>
+  </sc-if>
+
+  <!-- Delete confirmation -->
+  <sc-if value="{{confirmOpen}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; z-index: 30; inset: 0; background: rgba(14,23,38,0.45)">
+      <div role="alertdialog" aria-modal="true" aria-labelledby="del-h" aria-describedby="del-d" style="position: absolute; top: 180px; left: 20px; right: 20px; padding: 20px; border-radius: 20px; background: #FFFFFF; box-shadow: 0 20px 40px rgba(14,23,38,0.25); display: flex; flex-direction: column; gap: 12px">
+        <h2 id="del-h" style="margin: 0; font-size: 18px; font-weight: 800; letter-spacing: -0.2px">Delete this post?</h2>
+        <p id="del-d" style="margin: 0; font-size: 14px; line-height: 1.5; color: #3A4456">“Mess feedback app for hostels” and the {{counts.all}} profiles shared with it will be removed. This can’t be undone.</p>
+        <div style="display: flex; gap: 8px; margin-top: 4px">
+          <button type="button" onClick="{{cancelDelete}}" style="flex: 1; height: 48px; border-radius: 14px; border: 1px solid #E3E7F0; background: #FFFFFF; color: #13235B; font-size: 14px; font-weight: 700">Cancel</button>
+          <button type="button" onClick="{{confirmDelete}}" style="flex: 1; height: 48px; border-radius: 14px; border: 0; background: #B42318; color: #FFFFFF; font-size: 14px; font-weight: 700">Delete</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2333}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { filter: 'All', open: { km: true }, short: { vs: true }, closed: false, menu: false, confirm: false, deleted: false };
+  }
+  renderVals() {
+    // Placeholder students and contact details.
+    const ALL = [
+      { id: 'rg', name: 'Rohan Gupta', initials: 'RG', av: ['#E0F2FE', '#075985'], isNew: true, sharedAt: '5h ago',
+        programme: 'B.Tech Electronics', year: 'Year 3', yearShort: '3rd year', dept: 'Electronics & Comm.', enrol: '23116042', cgpa: '8.1',
+        email: 'rohan.gupta@ece.iitr.ac.in', phone: '+91 90000 44556',
+        projects: [['IoT attendance tracker', 'ESP32 | React Native | 2026']],
+        internships: [['Embedded systems intern, PSU', 'Summer 2026 | 6 weeks']],
+        clubs: [['Robotics Section', 'Electronics lead']],
+        skills: ['React Native', 'C++', 'IoT'] },
+      { id: 'km', name: 'Kavya Menon', initials: 'KM', av: ['#FCE7F3', '#9D174D'], isNew: true, sharedAt: '2h ago',
+        programme: 'B.Tech Computer Science', year: 'Year 2', yearShort: '2nd year', dept: 'Computer Science', enrol: '24114031', cgpa: '8.9',
+        email: 'kavya.menon@cs.iitr.ac.in', phone: '+91 90000 11223',
+        projects: [['Campus lost-and-found app', 'Flutter | Firebase | 2026'], ['Library seat tracker', 'React | Node | 2025']],
+        internships: [['Mobile developer intern, CRED', 'Summer 2026 | 8 weeks']],
+        clubs: [['Mobile Development Club', 'Core member'], ['Design Club', 'Member']],
+        skills: ['Flutter', 'Firebase', 'Figma'] },
+      { id: 'si', name: 'Sneha Iyer', initials: 'SI', av: ['#FFF4DB', '#8A4B00'], isNew: true, sharedAt: 'Yesterday',
+        programme: 'B.Des Design', year: 'Year 2', yearShort: '2nd year', dept: 'Design', enrol: '24125007', cgpa: '8.6',
+        email: 'sneha.iyer@des.iitr.ac.in', phone: '+91 90000 77889',
+        projects: [['Hostel complaint portal redesign', 'Figma | user research | 2026']],
+        internships: [],
+        clubs: [['Design Club', 'Secretary'], ['Photography Club', 'Member']],
+        skills: ['Figma', 'UX research', 'Prototyping'] },
+      { id: 'vs', name: 'Vikram Singh', initials: 'VS', av: ['#E3F8EC', '#067647'], isNew: false, sharedAt: '2 days ago',
+        programme: 'M.Tech Computer Science', year: 'Year 1', yearShort: '1st year', dept: 'Computer Science', enrol: '26514012', cgpa: '9.1',
+        email: 'vikram.singh@cs.iitr.ac.in', phone: '+91 90000 99001',
+        projects: [['Real-time menu analytics dashboard', 'Python | Postgres | 2025']],
+        internships: [['Backend intern, food-delivery company', '2024 | 6 months']],
+        clubs: [['Programming Club', 'Mentor']],
+        skills: ['Python', 'PostgreSQL', 'APIs'] }
+    ];
+
+    const { filter, open, short } = this.state;
+    const counts = {
+      all: ALL.length,
+      new: ALL.filter((p) => p.isNew).length,
+      short: ALL.filter((p) => short[p.id]).length
+    };
+
+    const filters = [['All', counts.all], ['New', counts.new], ['Shortlisted', counts.short]].map(([label, n]) => {
+      const on = label === filter;
+      return {
+        label: label + ' (' + n + ')',
+        pressed: on ? 'true' : 'false',
+        bg: on ? '#13235B' : '#FFFFFF',
+        fg: on ? '#FFFFFF' : '#3A4456',
+        border: on ? '#13235B' : '#DDE2EE',
+        pick: () => this.setState({ filter: label })
+      };
+    });
+
+    const people = ALL
+      .filter((p) => filter === 'All' || (filter === 'New' && p.isNew) || (filter === 'Shortlisted' && short[p.id]))
+      .map((p) => {
+        const isOpen = !!open[p.id];
+        const isShort = !!short[p.id];
+        const toItems = (arr) => arr.map((x) => ({ a: x[0], b: x[1] }));
+        return {
+          ...p,
+          avBg: p.av[0], avFg: p.av[1],
+          isShort,
+          open: isOpen,
+          expanded: isOpen ? 'true' : 'false',
+          toggleLabel: isOpen ? 'Hide experience' : 'View experience',
+          chev: isOpen ? 'm18 15-6-6-6 6' : 'm6 9 6 6 6-6',
+          toggle: () => this.setState({ open: { ...this.state.open, [p.id]: !isOpen } }),
+          sections: [
+            { title: 'Projects', items: toItems(p.projects) },
+            { title: 'Internships', items: p.internships.length ? toItems(p.internships) : [{ a: 'No internships yet', b: '' }] },
+            { title: 'Student clubs', items: toItems(p.clubs) }
+          ],
+          pressed: isShort ? 'true' : 'false',
+          slBg: isShort ? '#E3F8EC' : '#13235B',
+          slFg: isShort ? '#067647' : '#FFFFFF',
+          starFill: isShort ? 'currentColor' : 'none',
+          slLabel: isShort ? 'Shortlisted' : 'Shortlist',
+          shortlist: () => this.setState({ short: { ...this.state.short, [p.id]: !isShort } })
+        };
+      });
+
+    const closed = !!this.state.closed;
+    return {
+      counts, filters, people,
+      isClosed: closed && !this.state.deleted, isOpenPost: !closed && !this.state.deleted,
+      isDeleted: this.state.deleted, notDeleted: !this.state.deleted,
+      menuOpen: this.state.menu, menuExpanded: this.state.menu ? 'true' : 'false',
+      toggleMenu: () => this.setState({ menu: !this.state.menu }),
+      askDelete: () => this.setState({ menu: false, confirm: true }),
+      confirmOpen: this.state.confirm,
+      cancelDelete: () => this.setState({ confirm: false }),
+      confirmDelete: () => this.setState({ confirm: false, deleted: true }),
+      closePost: () => this.setState({ closed: true }),
+      reopenPost: () => this.setState({ closed: false }),
+      backHref: this.props.backHref || 'MyPosts.dc.html'
+    };
+  }
+}
+</script>
+</body>
+</html>

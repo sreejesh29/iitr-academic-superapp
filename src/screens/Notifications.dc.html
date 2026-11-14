@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Campus app – Notifications</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2448C9;text-decoration:none}a:hover{color:#16308F}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+
+<div style="position: relative; width: 390px; min-height: {{minH}}; box-sizing: border-box; background: #F3F5FA; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #0E1726; display: flex; flex-direction: column; overflow-x: clip">
+
+  <!-- Header: solid navy, stays put -->
+  <header style="position: sticky; top: 0; z-index: 0; background: #13235B; padding: 16px 16px 64px; display: flex; flex-direction: column; gap: 16px; color: #FFFFFF">
+    <div style="display: flex; align-items: center; gap: 8px">
+      <a href="{{backHref}}" aria-label="Back" style="width: 44px; height: 44px; border-radius: 14px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+      </a>
+      <div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0">
+        <h1 style="margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.3">Notifications</h1>
+        <span style="font-size: 12px; color: #C9D2EC">{{unreadLabel}}</span>
+      </div>
+      <sc-if value="{{hasUnread}}" hint-placeholder-val="{{true}}">
+        <button type="button" onClick="{{markAll}}" style="flex-shrink: 0; height: 36px; padding: 0 12px; border-radius: 10px; border: 0; background: rgba(255,255,255,0.12); color: #FFFFFF; font-size: 13px; font-weight: 700">Mark all read</button>
+      </sc-if>
+    </div>
+  </header>
+
+  <!-- Content sheet -->
+  <div style="position: relative; z-index: 1; margin-top: -28px; flex: 1; background: #FFFFFF; border-radius: 28px 28px 0 0; padding: 10px 0 40px; box-shadow: 0 -10px 30px rgba(14,23,38,0.22); display: flex; flex-direction: column; gap: 10px; overflow: hidden">
+    <div aria-hidden="true" style="width: 40px; height: 5px; margin: 0 auto; border-radius: 3px; background: #C9D2EC"></div>
+
+    <!-- Full-width feed (infinite scroll), rows separated by dividers.
+         Unread rows carry a light blue tint; tapping a row marks it read. -->
+    <ul aria-label="Notifications" style="margin: 0; padding: 0; list-style: none; background: #FFFFFF; display: flex; flex-direction: column; border-bottom: 1px solid #EDF0F6">
+      <sc-for list="{{items}}" as="n" hint-placeholder-count="10">
+        <li style="border-top: {{n.divider}}">
+          <a href="#" onClick="{{n.open}}" aria-label="{{n.aria}}" style="display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; background: {{n.bg}}; color: #0E1726">
+            <span style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+              <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: {{n.chipBg}}; color: {{n.chipFg}}">{{n.cat}}</span>
+              <span style="flex-shrink: 0; font-size: 12px; color: #5B6577">{{n.time}}</span>
+            </span>
+            <span style="font-size: 14px; font-weight: {{n.weight}}; line-height: 1.4">{{n.title}}</span>
+            <span style="font-size: 13px; line-height: 1.45; color: #5B6577">{{n.body}}</span>
+          </a>
+        </li>
+      </sc-for>
+    </ul>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1184}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { read: {} };
+  }
+  renderVals() {
+    const S = this.state;
+    const CAT = {
+      Attendance:      ['#E3F8EC', '#067647'],
+      Assignment:      ['#FDE7E4', '#B42318'],
+      Notice:          ['#FCE7B4', '#8A4B00'],
+      'Study material': ['#EDE9FE', '#5B21B6'],
+      Collaboration:   ['#FCE7F3', '#9D174D'],
+      Grades:          ['#E0F2FE', '#075985'],
+      Leave:           ['#FFF4DB', '#8A4B00']
+    };
+    // Newest first. The first three are unread, matching the bell badge ("3 unread").
+    const RAW = [
+      { id: 'att-closed', cat: 'Attendance', time: '12 min ago', unread: true,
+        title: 'Attendance closed | MAN-301', body: 'You were marked present in Probability & Statistics.' },
+      { id: 'a3-due', cat: 'Assignment', time: '1h ago', unread: true,
+        title: 'Assignment 3 is due tonight', body: 'Subnetting & CIDR for CSN-341 closes at 11:59 PM.' },
+      { id: 'midsem', cat: 'Notice', time: '2h ago', unread: true,
+        title: 'Mid-semester exam timetable published', body: 'Academic Affairs posted the timetable for all B.Tech programmes.' },
+      { id: 'att-open', cat: 'Attendance', time: '18 min ago', unread: false,
+        title: 'Attendance open | MAN-301', body: 'Dr. M. Kulkarni opened the portal in LHC 204.' },
+      { id: 'collab', cat: 'Collaboration', time: '4h ago', unread: false,
+        title: 'New response to your post', body: 'Kavya Iyer shared her profile for Mess feedback app.' },
+      { id: 'tut6', cat: 'Study material', time: 'Yesterday, 18:15', unread: false,
+        title: 'New file in CSN-341', body: 'Tutorial 6 – Routing.pdf was added to Study material.' },
+      { id: 'grade', cat: 'Grades', time: '7 Nov, 16:40', unread: false,
+        title: 'Marks published | CSN-345', body: 'SRS document: Mess feedback app – you scored 34/40.' },
+      { id: 'leave', cat: 'Leave', time: '7 Nov, 09:12', unread: false,
+        title: 'Leave approved', body: 'Prof. R. Menon approved your medical leave for 6 Nov.' },
+      { id: 'trials', cat: 'Notice', time: '6 Nov, 14:02', unread: false,
+        title: 'Application received', body: 'Sports Council received your application for the football trials.' },
+      { id: 'a2-grade', cat: 'Grades', time: '30 Oct, 11:20', unread: false,
+        title: 'Marks published | CSN-341', body: 'Assignment 2: IP addressing – you scored 18/20.' }
+    ];
+    // Unread first is not forced: the list stays in time order, tint marks what's new.
+    const order = [0, 3, 1, 2, 4, 5, 6, 7, 8, 9];
+    const isUnread = (n) => n.unread && !S.read[n.id];
+    const items = order.map((k, i) => {
+      const n = RAW[k];
+      const un = isUnread(n);
+      return {
+        ...n,
+        chipBg: CAT[n.cat][0], chipFg: CAT[n.cat][1],
+        bg: un ? '#EEF2FF' : '#FFFFFF',
+        weight: un ? 700 : 600,
+        aria: (un ? 'Unread. ' : '') + n.title + '. ' + n.body + ' ' + n.time,
+        divider: '1px solid ' + (un ? '#DCE4FF' : '#EDF0F6'),
+        open: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ read: { ...this.state.read, [n.id]: true } }); }
+      };
+    });
+    const unread = RAW.filter(isUnread).length;
+
+    return {
+      items,
+      hasUnread: unread > 0,
+      unreadLabel: unread ? unread + ' unread' : 'All caught up',
+      markAll: () => this.setState({ read: RAW.reduce((m, n) => ({ ...m, [n.id]: true }), {}) }),
+      backHref: this.props.backHref || 'Main.dc.html',
+      minH: this.props.minH || '844px'
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Campus app – Assignments, teaching (TA)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2448C9;text-decoration:none}a:hover{color:#16308F}
+button{font-family:inherit;cursor:pointer}
+input::placeholder,textarea::placeholder{color:#8A93A6}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
+.hs{scrollbar-width:none}.hs::-webkit-scrollbar{display:none}
+@keyframes toastIn{from{transform:translateY(-6px);opacity:0}to{transform:none;opacity:1}}
+</style>
+</helmet>
+
+<div style="position: relative; width: 390px; min-height: {{minH}}; box-sizing: border-box; background: #F3F5FA; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #0E1726; display: flex; flex-direction: column; overflow-x: clip">
+
+  <!-- ===================== LIST ===================== -->
+  <sc-if value="{{isList}}" hint-placeholder-val="{{true}}">
+    <header style="position: sticky; top: 0; z-index: 0; background: #13235B; padding: 16px 16px 64px; display: flex; flex-direction: column; gap: 16px; color: #FFFFFF">
+      <div style="display: flex; align-items: center; gap: 8px">
+        <a href="{{backHref}}" aria-label="Back to Home" style="width: 44px; height: 44px; border-radius: 14px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+        </a>
+        <div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0">
+          <h1 style="margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.3">Assignments</h1>
+          <span style="font-size: 12px; color: #C9D2EC">Autumn semester 2026</span>
+        </div>
+      </div>
+
+      <!-- Role switch: same switch sits on the student list -->
+      <div role="tablist" aria-label="Assignments view" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); padding: 4px; border-radius: 14px; background: rgba(255,255,255,0.12)">
+        <a href="{{studentHref}}" role="tab" aria-selected="false" style="height: 36px; border-radius: 10px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">Your assignments</a>
+        <span role="tab" aria-selected="true" style="height: 36px; border-radius: 10px; background: #FFFFFF; color: #13235B; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: 700">TA <span style="font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 5px; background: rgb(252, 231, 180); color: rgb(138, 75, 0)">{{taBadge}}</span></span>
+      </div>
+
+      <!-- Course switcher: one pill per course the student assists. Hidden when there is only one. -->
+      <sc-if value="{{multi}}" hint-placeholder-val="{{true}}">
+        <div role="tablist" aria-label="Course" class="hs" style="margin: 0 -16px; display: flex; gap: 8px; overflow-x: auto; padding: 0 16px">
+          <sc-for list="{{courseTabs}}" as="c" hint-placeholder-count="4">
+            <button type="button" role="tab" aria-selected="{{c.selected}}" aria-label="{{c.aria}}" onClick="{{c.pick}}" style="flex-shrink: 0; height: 36px; padding: 0 14px; border-radius: 999px; border: 0; background: {{c.bg}}; color: {{c.fg}}; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px">
+              {{c.label}}
+              <sc-if value="{{c.hasDue}}" hint-placeholder-val="{{false}}">
+                <span aria-hidden="true" style="min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 6px; background: #F79009; color: #FFFFFF; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{c.due}}</span>
+              </sc-if>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+
+    </header>
+
+    <div style="position: relative; z-index: 1; margin-top: -28px; flex: 1; background: #F3F5FA; border-radius: 28px 28px 0 0; padding: 10px 16px 40px; box-shadow: 0 -10px 30px rgba(14,23,38,0.22); display: flex; flex-direction: column; gap: 20px; height: 1021px">
+      <div aria-hidden="true" style="width: 40px; height: 5px; margin: 0 auto -6px; border-radius: 3px; background: #C9D2EC"></div>
+
+      <!-- The selected course -->
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.3px; color: #5B6577">{{scope.kicker}}</span>
+        <h2 style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">{{scope.title}}</h2>
+        <span style="font-size: 12px; color: #5B6577">{{scope.sub}}</span>
+      </div>
+
+      <button type="button" onClick="{{goCreate}}" style="height: 52px; border-radius: 14px; border: 0; background: #13235B; color: #FFFFFF; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+        Create assignment
+      </button>
+
+      <sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
+        <p role="status" style="margin: 0; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; background: #E3F8EC; color: #054F31; font-size: 13px; font-weight: 600; animation: toastIn 0.3s ease-out">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0"><path d="m5 12 5 5 9-10"></path></svg>
+          {{toast}}
+        </p>
+      </sc-if>
+
+      <sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
+        <section style="display: flex; flex-direction: column; gap: 12px">
+          <h2 style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">{{g.title}}</h2>
+          <sc-for list="{{g.items}}" as="a" hint-placeholder-count="2">
+            <article aria-label="{{a.title}}" style="background: #FFFFFF; border: 1px solid #E3E7F0; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+                <span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 6px; background: {{a.chipBg}}; color: {{a.chipFg}}">{{a.chip}}</span>
+                <span style="font-size: 12px; color: #5B6577">Out of {{a.max}}</span>
+              </div>
+              <span style="font-size: 16px; font-weight: 700; line-height: 1.35">{{a.title}}</span>
+              <span style="font-size: 12px; color: #5B6577">{{a.meta}}</span>
+
+              <dl style="margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 12px 0; border-top: 1px solid #EDF0F6; border-bottom: {{a.statBorder}}">
+                <div style="display: flex; flex-direction: column; gap: 2px; padding-right: 12px">
+                  <dt style="font-size: 12px; font-weight: 600; color: #5B6577">Submitted</dt>
+                  <dd style="margin: 0; font-size: 22px; line-height: 1.1; font-weight: 800; color: #13235B">{{a.submitted}}/{{a.total}}</dd>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 2px; padding-left: 12px; border-left: 1px solid #EDF0F6">
+                  <dt style="font-size: 12px; font-weight: 600; color: #5B6577">{{a.stat2Label}}</dt>
+                  <dd style="margin: 0; font-size: 22px; line-height: 1.1; font-weight: 800; color: {{a.stat2Fg}}">{{a.stat2}}</dd>
+                </div>
+              </dl>
+
+              <sc-if value="{{a.canEnter}}" hint-placeholder-val="{{false}}">
+                <button type="button" onClick="{{a.openMarks}}" aria-label="Enter marks for {{a.title}}" style="height: 44px; border-radius: 12px; border: 0; background: #13235B; color: #FFFFFF; font-size: 13px; font-weight: 700">Enter marks</button>
+              </sc-if>
+              <sc-if value="{{a.canView}}" hint-placeholder-val="{{false}}">
+                <button type="button" onClick="{{a.openMarks}}" aria-label="View marks for {{a.title}}" style="height: 44px; border-radius: 12px; border: 1px solid #E3E7F0; background: #FFFFFF; color: #13235B; font-size: 13px; font-weight: 700">View marks</button>
+              </sc-if>
+            </article>
+          </sc-for>
+        </section>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- ===================== CREATE ===================== -->
+  <sc-if value="{{isCreate}}" hint-placeholder-val="{{false}}">
+    <header style="position: sticky; top: 0; z-index: 0; background: #13235B; padding: 16px 16px 64px; display: flex; flex-direction: column; gap: 16px; color: #FFFFFF">
+      <div style="display: flex; align-items: center; gap: 8px">
+        <a href="{{subBackHref}}" onClick="{{goList}}" aria-label="Back to assignments" style="width: 44px; height: 44px; border-radius: 14px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+        </a>
+        <div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0">
+          <h1 style="margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.2px">Create assignment</h1>
+          <span style="font-size: 12px; color: #C9D2EC">{{f.courseSub}}</span>
+        </div>
+      </div>
+    </header>
+
+    <div style="position: relative; z-index: 1; margin-top: -28px; flex: 1; background: #F3F5FA; border-radius: 28px 28px 0 0; padding: 10px 16px 40px; box-shadow: 0 -10px 30px rgba(14,23,38,0.22); display: flex; flex-direction: column; gap: 20px">
+      <div aria-hidden="true" style="width: 40px; height: 5px; margin: 0 auto -6px; border-radius: 3px; background: #C9D2EC"></div>
+
+      <!-- Title -->
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <label for="ta-title" style="font-size: 14px; font-weight: 700">Title</label>
+        <input id="ta-title" type="text" maxLength="80" value="{{f.title}}" onChange="{{f.onTitle}}" placeholder="e.g. Lab 7: Pointers" style="height: 52px; box-sizing: border-box; padding: 0 14px; border-radius: 14px; border: 1.5px solid #E3E7F0; background: #FFFFFF; color: #0E1726; font-family: inherit; font-size: 15px; font-weight: 600; outline: none">
+      </div>
+
+      <!-- Instructions -->
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <label for="ta-ins" style="font-size: 14px; font-weight: 700">Instructions</label>
+        <textarea id="ta-ins" rows="5" value="{{f.ins}}" onChange="{{f.onIns}}" placeholder="What students need to do, how to name files and anything else they should know" style="box-sizing: border-box; padding: 12px 14px; border-radius: 14px; border: 1.5px solid #E3E7F0; background: #FFFFFF; color: #0E1726; font-family: inherit; font-size: 14px; line-height: 1.5; resize: vertical; outline: none"></textarea>
+      </div>
+
+      <!-- Documents for students -->
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 14px; font-weight: 700">Documents for students</span>
+          <span style="font-size: 12px; color: #5B6577">Question paper, starter code or reference material</span>
+        </div>
+        <sc-if value="{{f.hasFiles}}" hint-placeholder-val="{{true}}">
+          <ul aria-label="Attached documents" style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px">
+            <sc-for list="{{f.files}}" as="x" hint-placeholder-count="1">
+              <li style="display: flex; align-items: center; gap: 10px; padding: 10px 4px 10px 12px; border-radius: 12px; background: #FFFFFF; border: 1px solid #E3E7F0">
+                <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                  <span style="font-size: 13px; font-weight: 600; overflow-wrap: anywhere">{{x.name}}</span>
+                  <span style="font-size: 12px; color: #5B6577">{{x.size}}</span>
+                </span>
+                <button type="button" onClick="{{x.remove}}" aria-label="Remove {{x.name}}" style="width: 36px; height: 36px; flex-shrink: 0; border: 0; border-radius: 10px; background: transparent; color: #5B6577; display: flex; align-items: center; justify-content: center">
+                  <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+                </button>
+              </li>
+            </sc-for>
+          </ul>
+        </sc-if>
+        <button type="button" onClick="{{f.addFile}}" style="padding: 16px; border-radius: 16px; border: 1.5px dashed #C3C9D6; background: #F7F8FB; display: flex; align-items: center; gap: 12px; color: #0E1726; text-align: left">
+          <span aria-hidden="true" style="width: 36px; height: 36px; border-radius: 12px; background: #EEF2FF; color: #2448C9; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M17 8l-5-5-5 5M12 3v12"></path></svg>
+          </span>
+          <span style="display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 14px; font-weight: 700">Upload document</span>
+            <span style="font-size: 12px; color: #5B6577">PDF, DOCX, images or code | Up to 20 MB</span>
+          </span>
+        </button>
+      </div>
+
+      <!-- Submission type -->
+      <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column">
+        <legend style="padding: 0; margin-bottom: 10px; font-size: 14px; font-weight: 700">Submission type</legend>
+        <div role="radiogroup" aria-label="Submission type" style="display: flex; flex-wrap: wrap; gap: 8px">
+          <sc-for list="{{f.types}}" as="t" hint-placeholder-count="2">
+            <button type="button" role="radio" aria-checked="{{t.checked}}" onClick="{{t.pick}}" style="height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid {{t.border}}; background: {{t.bg}}; color: {{t.fg}}; font-size: 13px; font-weight: 700">{{t.label}}</button>
+          </sc-for>
+        </div>
+      </fieldset>
+
+      <!-- Accepted formats -->
+      <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column">
+        <legend style="padding: 0; margin-bottom: 10px; font-size: 14px; font-weight: 700">Students can upload</legend>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+          <sc-for list="{{f.formats}}" as="t" hint-placeholder-count="4">
+            <button type="button" role="checkbox" aria-checked="{{t.checked}}" onClick="{{t.pick}}" style="height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid {{t.border}}; background: {{t.bg}}; color: {{t.fg}}; font-size: 13px; font-weight: 700">{{t.label}}</button>
+          </sc-for>
+        </div>
+      </fieldset>
+
+      <!-- Due + marks -->
+      <div style="display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 12px">
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <label for="ta-due" style="font-size: 14px; font-weight: 700">Due date</label>
+          <input id="ta-due" type="date" value="{{f.due}}" onChange="{{f.onDue}}" style="height: 52px; box-sizing: border-box; padding: 0 12px; border-radius: 14px; border: 1.5px solid #E3E7F0; background: #FFFFFF; color: #0E1726; font-family: inherit; font-size: 14px; font-weight: 600; outline: none">
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <label for="ta-time" style="font-size: 14px; font-weight: 700">Time</label>
+          <input id="ta-time" type="time" value="{{f.time}}" onChange="{{f.onTime}}" style="height: 52px; box-sizing: border-box; padding: 0 12px; border-radius: 14px; border: 1.5px solid #E3E7F0; background: #FFFFFF; color: #0E1726; font-family: inherit; font-size: 14px; font-weight: 600; outline: none">
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <label for="ta-max" style="font-size: 14px; font-weight: 700">Maximum marks</label>
+        <input id="ta-max" type="number" min="1" inputMode="numeric" value="{{f.max}}" onChange="{{f.onMax}}" style="height: 52px; box-sizing: border-box; padding: 0 14px; border-radius: 14px; border: 1.5px solid #E3E7F0; background: #FFFFFF; color: #0E1726; font-family: inherit; font-size: 15px; font-weight: 600; outline: none">
+      </div>
+
+      <p style="margin: 0; display: flex; align-items: flex-start; gap: 8px; padding: 12px 14px; border-radius: 14px; background: #EEF2FF; font-size: 13px; line-height: 1.5; color: #13235B">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2448C9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8h.01M11 12h1v4h1"></path></svg>
+        {{f.notify}}
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <button type="button" onClick="{{f.publish}}" style="height: 52px; border-radius: 14px; border: 0; background: #13235B; color: #FFFFFF; font-size: 15px; font-weight: 700">Publish assignment</button>
+        <button type="button" onClick="{{cancel}}" style="height: 44px; border-radius: 14px; border: 0; background: transparent; color: #2448C9; font-size: 14px; font-weight: 700">Cancel</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===================== MARKS ===================== -->
+  <sc-if value="{{isMarks}}" hint-placeholder-val="{{false}}">
+    <header style="position: sticky; top: 0; z-index: 0; background: #13235B; padding: 16px 16px 64px; display: flex; flex-direction: column; gap: 16px; color: #FFFFFF">
+      <div style="display: flex; align-items: center; gap: 8px">
+        <a href="{{subBackHref}}" onClick="{{goList}}" aria-label="Back to assignments" style="width: 44px; height: 44px; border-radius: 14px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+        </a>
+        <div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0">
+          <h1 title="{{m.title}}" style="margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{m.title}}</h1>
+          <span style="font-size: 12px; color: #C9D2EC">{{m.sub}}</span>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+        <sc-for list="{{m.tiles}}" as="t" hint-placeholder-count="3">
+          <div style="padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.12); display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 12px; color: #C9D2EC">{{t.label}}</span>
+            <span style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px">{{t.n}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </header>
+
+    <div style="position: relative; z-index: 1; margin-top: -28px; flex: 1; background: #F3F5FA; border-radius: 28px 28px 0 0; padding: 10px 16px 40px; box-shadow: 0 -10px 30px rgba(14,23,38,0.22); display: flex; flex-direction: column; gap: 16px">
+      <div aria-hidden="true" style="width: 40px; height: 5px; margin: 0 auto -2px; border-radius: 3px; background: #C9D2EC"></div>
+
+      <sc-if value="{{m.editable}}" hint-placeholder-val="{{true}}">
+        <button type="button" onClick="{{m.importSheet}}" style="height: 44px; border-radius: 12px; border: 1px solid #E3E7F0; background: #FFFFFF; color: #13235B; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M17 8l-5-5-5 5M12 3v12"></path></svg>
+          Import from marks sheet (CSV / Excel)
+        </button>
+      </sc-if>
+
+      <!-- Published marks can still be corrected -->
+      <sc-if value="{{m.canEdit}}" hint-placeholder-val="{{false}}">
+        <button type="button" onClick="{{m.startEdit}}" style="height: 44px; border-radius: 12px; border: 1px solid #E3E7F0; background: #FFFFFF; color: #13235B; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>
+          Edit marks
+        </button>
+      </sc-if>
+
+      <!-- Search -->
+      <label style="position: relative; display: block">
+        <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search students</span>
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B6577" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 14px; top: 15px"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+        <input type="search" value="{{m.query}}" onChange="{{m.onQuery}}" placeholder="Search by name or enrolment no." style="width: 100%; height: 48px; box-sizing: border-box; padding: 0 14px 0 42px; border-radius: 14px; border: 1.5px solid #E3E7F0; background: #FFFFFF; color: #0E1726; font-family: inherit; font-size: 14px; outline: none">
+      </label>
+
+      <sc-if value="{{m.hasToast}}" hint-placeholder-val="{{false}}">
+        <p role="status" style="margin: 0; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; background: #E3F8EC; color: #054F31; font-size: 13px; font-weight: 600; animation: toastIn 0.3s ease-out">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0"><path d="m5 12 5 5 9-10"></path></svg>
+          {{m.toast}}
+        </p>
+      </sc-if>
+
+      <!-- Students -->
+      <!-- Full-width list, edge to edge like the chat list -->
+      <ul aria-label="Students" style="margin: 0 -16px; padding: 0 16px; list-style: none; background: #FFFFFF; border-top: 1px solid #E3E7F0; border-bottom: 1px solid #E3E7F0; display: flex; flex-direction: column">
+        <sc-for list="{{m.rows}}" as="s" hint-placeholder-count="6">
+          <li style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: {{s.divider}}">
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+              <span style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px">
+                <span style="font-size: 14px; font-weight: 700">{{s.name}}</span>
+                <sc-if value="{{s.missed}}" hint-placeholder-val="{{false}}">
+                  <span style="font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 5px; background: #FDE7E4; color: #B42318">Not submitted</span>
+                </sc-if>
+              </span>
+              <span style="font-size: 12px; color: #5B6577">{{s.enr}}</span>
+              <sc-if value="{{s.over}}" hint-placeholder-val="{{false}}">
+                <span style="font-size: 12px; font-weight: 600; color: #B42318">Max is {{m.max}}</span>
+              </sc-if>
+            </span>
+            <sc-if value="{{m.editable}}" hint-placeholder-val="{{true}}">
+              <span style="flex-shrink: 0; display: flex; align-items: center; gap: 6px">
+                <input type="number" min="0" max="{{m.max}}" inputMode="decimal" value="{{s.val}}" onChange="{{s.set}}" aria-label="Marks for {{s.name}}, out of {{m.max}}" placeholder="–" style="width: 60px; height: 44px; box-sizing: border-box; padding: 0 8px; border-radius: 12px; border: 1.5px solid {{s.border}}; background: {{s.bg}}; color: #0E1726; font-family: inherit; font-size: 16px; font-weight: 700; text-align: center; outline: none">
+                <span style="width: 24px; font-size: 13px; font-weight: 600; color: #5B6577">/{{m.max}}</span>
+              </span>
+            </sc-if>
+            <sc-if value="{{m.readOnly}}" hint-placeholder-val="{{false}}">
+              <span style="flex-shrink: 0; font-size: 16px; font-weight: 800; color: #13235B">{{s.val}}<span style="font-size: 13px; font-weight: 600; color: #5B6577">/{{m.max}}</span></span>
+            </sc-if>
+          </li>
+        </sc-for>
+        <sc-if value="{{m.noRows}}" hint-placeholder-val="{{false}}">
+          <li style="padding: 20px 0; font-size: 14px; color: #3A4456; text-align: center">No students match “{{m.query}}”.</li>
+        </sc-if>
+      </ul>
+
+      <!-- Publish -->
+      <sc-if value="{{m.editable}}" hint-placeholder-val="{{true}}">
+        <sc-if value="{{m.showPublish}}" hint-placeholder-val="{{true}}">
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <button type="button" onClick="{{m.askPublish}}" style="height: 52px; border-radius: 14px; border: 0; background: #13235B; color: #FFFFFF; font-size: 15px; font-weight: 700">{{m.publishLabel}}</button>
+            <sc-if value="{{m.isEditing}}" hint-placeholder-val="{{false}}">
+              <button type="button" onClick="{{m.cancelEdit}}" style="height: 44px; border-radius: 14px; border: 0; background: transparent; color: #2448C9; font-size: 14px; font-weight: 700">Discard changes</button>
+            </sc-if>
+            <span style="font-size: 12px; line-height: 1.45; color: #5B6577; text-align: center">{{m.publishHint}}</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{m.confirming}}" hint-placeholder-val="{{false}}">
+          <div role="alertdialog" aria-label="{{m.confirmTitle}}" style="padding: 14px; border-radius: 16px; background: #FFFFFF; border: 1px solid #E3E7F0; display: flex; flex-direction: column; gap: 12px">
+            <span style="font-size: 14px; font-weight: 700">{{m.confirmTitle}}</span>
+            <span style="font-size: 13px; line-height: 1.45; color: #3A4456">{{m.confirmBody}}</span>
+            <span style="display: flex; gap: 8px">
+              <button type="button" onClick="{{m.cancelPublish}}" style="flex: 1; height: 44px; border-radius: 12px; border: 1px solid #E3E7F0; background: #FFFFFF; color: #3A4456; font-size: 14px; font-weight: 700">Cancel</button>
+              <button type="button" onClick="{{m.doPublish}}" style="flex: 1; height: 44px; border-radius: 12px; border: 0; background: #13235B; color: #FFFFFF; font-size: 14px; font-weight: 700">{{m.confirmCta}}</button>
+            </span>
+          </div>
+        </sc-if>
+      </sc-if>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mode":{"editor":"enum","options":["","create","marks"],"default":""},"open":{"editor":"enum","options":["lab5","lab4","ds2","ml1"],"default":"lab5"},"course":{"editor":"enum","options":["CSN-103","CSN-221","CSN-515"],"default":"CSN-103"},"single":{"editor":"boolean","default":false},"editing":{"editor":"boolean","default":false},"$preview":{"width":390,"height":1300}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    // view: undefined until the TA navigates inside this screen.
+    // course: the course being viewed; drives the list, create form and counts.
+    const start = props.single ? 'CSN-103' : (props.course || 'CSN-103');
+    this.state = {
+      view: undefined, toast: null, query: '', confirm: false, course: start,
+      // editing: id of a published assignment whose marks are being corrected; snapshot: marks before editing.
+      editing: props.editing ? (props.open || 'lab4') : null, snapshot: null, updated: {},
+      created: [], published: {}, marks: {},
+      form: { course: null, title: '', ins: '', type: 'Individual', formats: ['PDF', 'Code'], due: '2026-11-16', time: '23:59', max: '10', files: [{ id: 'f1', name: 'Lab 7 – Problems.pdf', size: '260 KB' }] },
+      seq: 1
+    };
+  }
+  renderVals() {
+    const S = this.state;
+    const P = this.props;
+
+    // Courses this student assists (mock). A B.Tech TA usually has one; a PhD scholar can have several.
+    // Today is Mon 9 Nov, 10:20.
+    const ALL_COURSES = {
+      'CSN-103': { name: 'Fundamentals of Programming', prof: 'Dr. V. Arora', batch: 'Batch T3', roster: [
+        ['23114003', 'Ananya Rao'], ['23114007', 'Arjun Nair'], ['23114011', 'Dev Malhotra'],
+        ['23114015', 'Ishita Sharma'], ['23114019', 'Kabir Singh'], ['23114022', 'Meera Pillai'],
+        ['23114026', 'Nikhil Joshi'], ['23114030', 'Priya Das'], ['23114034', 'Rohan Gupta'],
+        ['23114038', 'Sneha Iyer'] ] },
+      'CSN-221': { name: 'Data Structures', prof: 'Dr. P. Kapoor', batch: 'Batch P2', roster: [
+        ['24114002', 'Aditi Kulkarni'], ['24114009', 'Farhan Ali'], ['24114013', 'Gauri Menon'],
+        ['24114018', 'Harsh Vardhan'], ['24114024', 'Ira Chatterjee'], ['24114029', 'Jay Patel'],
+        ['24114033', 'Lavanya S'], ['24114041', 'Om Prakash'] ] },
+      'CSN-515': { name: 'Machine Learning', prof: 'Prof. A. Banerjee', batch: 'Section B', roster: [
+        ['22114005', 'Bhavya Jain'], ['22114012', 'Chirag Bansal'], ['22114020', 'Diya Thomas'],
+        ['22114027', 'Eshan Roy'], ['22114031', 'Kriti Arora'], ['22114036', 'Vivek Rana'] ] }
+    };
+    const CODES = P.single ? ['CSN-103'] : Object.keys(ALL_COURSES);
+    const COURSES = {};
+    CODES.forEach((c) => { COURSES[c] = ALL_COURSES[c]; });
+    const multi = CODES.length > 1;
+
+    const BASE = [
+      { id: 'lab6', course: 'CSN-103', title: 'Lab 6: Recursion', posted: '5 Nov', due: '12 Nov, 11:59 PM', max: 10, stage: 'open', submitted: 6, missed: [] },
+      { id: 'lab5', course: 'CSN-103', title: 'Lab 5: Arrays & strings', posted: '26 Oct', due: '2 Nov, 11:59 PM', max: 10, stage: 'graded', gradedOn: '6 Nov', submitted: 9, missed: ['23114019'], sheet: 'Lab5_marks_DrArora.xlsx' },
+      { id: 'lab4', course: 'CSN-103', title: 'Lab 4: Loops & conditionals', posted: '19 Oct', due: '26 Oct, 11:59 PM', max: 10, stage: 'published', gradedOn: '29 Oct', publishedOn: '31 Oct', submitted: 10, missed: [] },
+      { id: 'ds3', course: 'CSN-221', title: 'Assignment 3: Binary search trees', posted: '6 Nov', due: '15 Nov, 11:59 PM', max: 20, stage: 'open', submitted: 3, missed: [] },
+      { id: 'ds2', course: 'CSN-221', title: 'Assignment 2: Linked lists', posted: '20 Oct', due: '31 Oct, 11:59 PM', max: 20, stage: 'graded', gradedOn: '7 Nov', submitted: 7, missed: ['24114029'], sheet: 'DS_A2_marks_DrKapoor.csv' },
+      { id: 'ml1', course: 'CSN-515', title: 'Homework 1: Linear regression', posted: '14 Oct', due: '24 Oct, 11:59 PM', max: 25, stage: 'published', gradedOn: '1 Nov', publishedOn: '4 Nov', submitted: 6, missed: [] }
+    ].filter((a) => COURSES[a.course]);
+    // Marks the professor gave (the sheet the TA imports) and what the TA already typed.
+    const SHEET = {
+      lab5: { '23114003': '8', '23114007': '9', '23114011': '6', '23114015': '10', '23114019': '0', '23114022': '7', '23114026': '9', '23114030': '8', '23114034': '5', '23114038': '9' },
+      lab4: { '23114003': '9', '23114007': '10', '23114011': '7', '23114015': '10', '23114019': '6', '23114022': '8', '23114026': '9', '23114030': '7', '23114034': '6', '23114038': '10' },
+      ds2: { '24114002': '17', '24114009': '14', '24114013': '19', '24114018': '12', '24114024': '16', '24114029': '0', '24114033': '18', '24114041': '15' },
+      ml1: { '22114005': '22', '22114012': '18', '22114020': '24', '22114027': '20', '22114031': '21', '22114036': '17' }
+    };
+    const START = { lab5: { '23114003': '8', '23114007': '9', '23114011': '6' }, lab4: SHEET.lab4, ml1: SHEET.ml1 };
+
+    const all = [...S.created, ...BASE].map((a) => ({ ...a, stage: S.published[a.id] ? 'published' : a.stage, publishedOn: S.published[a.id] || a.publishedOn }));
+    const byId = (id) => all.find((a) => a.id === id) || all.find((a) => a.stage === 'graded') || all[0];
+    const rosterOf = (a) => COURSES[a.course].roster;
+    const marksOf = (id) => S.marks[id] || START[id] || {};
+    const filled = (a, mk) => rosterOf(a).filter((s) => mk[s[0]] !== undefined && String(mk[s[0]]).trim() !== '').length;
+    const avg = (a) => {
+      const mk = marksOf(a.id);
+      const v = rosterOf(a).map((s) => parseFloat(mk[s[0]])).filter((n) => !isNaN(n));
+      return v.length ? (Math.round((v.reduce((x, y) => x + y, 0) / v.length) * 10) / 10).toString() : '–';
+    };
+
+    // ---------- Navigation ----------
+    const view = S.view !== undefined ? S.view : { mode: P.mode || '', id: P.open || 'lab5' };
+    const internal = S.view !== undefined || !P.mode;
+    // Leaving the marks screen mid-edit drops unsaved changes.
+    const leaveEdit = () => (S.editing && S.snapshot ? { editing: null, marks: { ...S.marks, [S.editing]: S.snapshot } } : { editing: null });
+    const go = (v) => (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ view: v, confirm: false, query: '', toast: v.toast || null, ...leaveEdit() }); };
+    const goList = (e) => {
+      if (!internal) return;
+      if (e && e.preventDefault) e.preventDefault();
+      this.setState({ view: { mode: '' }, confirm: false, query: '', toast: null, ...leaveEdit() });
+    };
+
+    // ---------- Scope (course switcher) ----------
+    // One course at a time; the switcher filters by course.
+    const cur = COURSES[S.course] ? S.course : CODES[0];
+    const inScope = (a) => a.course === cur;
+    const toEnter = (code) => all.filter((a) => a.stage === 'graded' && a.course === code).length;
+    const courseTabs = (multi ? CODES : []).map((c) => {
+      const on = c === cur;
+      const due = toEnter(c);
+      return {
+        label: c,
+        aria: c + ' ' + COURSES[c].name + (due ? ', ' + due + ' to enter marks' : ''),
+        selected: on ? 'true' : 'false',
+        bg: on ? '#FFFFFF' : 'rgba(255,255,255,0.12)', fg: on ? '#13235B' : '#FFFFFF',
+        hasDue: due > 0, due,
+        pick: () => this.setState({ course: c, toast: null })
+      };
+    });
+    const scope = { kicker: cur + ' | ' + COURSES[cur].roster.length + ' students', title: COURSES[cur].name, sub: 'Professor - ' + COURSES[cur].prof };
+
+    // ---------- List ----------
+    // Two states only, matching the two headings: Unpublished / Published.
+    const CHIP = { unpublished: ['#FFF4DB', '#8A4B00'], published: ['#E3F8EC', '#067647'] };
+    const card = (a) => {
+      const total = rosterOf(a).length;
+      const pub = a.stage === 'published';
+      const chip = pub ? 'Published ' + a.publishedOn + (S.updated[a.id] ? ' | Edited ' + S.updated[a.id] : '') : 'Unpublished';
+      const mk = marksOf(a.id);
+      return {
+        ...a, total,
+        courseLine: a.course + ' | ' + COURSES[a.course].name,
+        chip, chipBg: CHIP[pub ? 'published' : 'unpublished'][0], chipFg: CHIP[pub ? 'published' : 'unpublished'][1],
+        meta: (a.stage === 'open' ? 'Due ' : 'Closed ') + a.due + ' | Posted ' + a.posted,
+        // Every unpublished card shows Marks entered, same layout.
+        stat2Label: pub ? 'Class average' : 'Marks entered',
+        stat2: pub ? avg(a) + '/' + a.max : filled(a, mk) + '/' + total,
+        stat2Fg: pub ? '#067647' : '#8A4B00',
+        statBorder: '1px solid #EDF0F6',
+        // Every unpublished assignment gets Enter marks.
+        canEnter: !pub,
+        canView: a.stage === 'published',
+        openMarks: go({ mode: 'marks', id: a.id })
+      };
+    };
+    const scoped = all.filter(inScope);
+    const openItems = scoped.filter((a) => a.stage === 'open').map(card);
+    const gradeItems = scoped.filter((a) => a.stage === 'graded').map(card);
+    const doneItems = scoped.filter((a) => a.stage === 'published').map(card);
+    const groups = [
+      // Graded ones (ready for marks) first, then those still open for submission.
+      { title: 'Marks unpublished', items: [...gradeItems, ...openItems] },
+      { title: 'Marks published', items: doneItems }
+    ].filter((g) => g.items.length);
+    const tiles = [
+      { label: 'Open', n: openItems.length },
+      { label: 'To enter', n: gradeItems.length },
+      { label: 'Published', n: doneItems.length }
+    ];
+
+    // ---------- Create ----------
+    const F = S.form;
+    // The assignment is created in the course being viewed (picked on the list).
+    const fCourse = cur;
+    const fc = COURSES[fCourse];
+    const setF = (patch) => this.setState({ form: { ...this.state.form, ...patch } });
+    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const pill = (on) => ({ bg: on ? '#13235B' : '#FFFFFF', fg: on ? '#FFFFFF' : '#3A4456', border: on ? '#13235B' : '#DDE2EE', checked: on ? 'true' : 'false' });
+    const SAMPLE_DOCS = [['Starter code.zip', '48 KB'], ['Sample input-output.txt', '3 KB'], ['Reference notes.pdf', '1.2 MB']];
+    const f = {
+      courseSub: fCourse + ' | ' + fc.name,
+      courses: CODES.map((c) => ({ label: c, aria: c + ' ' + COURSES[c].name, ...pill(c === fCourse), pick: () => setF({ course: c }) })),
+      notify: 'All ' + fc.roster.length + ' students in ' + fCourse + ' ' + fc.batch + ' are notified, and the assignment shows under their Assignments.',
+      title: F.title, onTitle: (e) => setF({ title: e.target.value }),
+      ins: F.ins, onIns: (e) => setF({ ins: e.target.value }),
+      due: F.due, onDue: (e) => setF({ due: e.target.value }),
+      time: F.time, onTime: (e) => setF({ time: e.target.value }),
+      max: F.max, onMax: (e) => setF({ max: e.target.value }),
+      types: ['Individual', 'Group'].map((t) => ({ label: t, ...pill(F.type === t), pick: () => setF({ type: t }) })),
+      formats: ['PDF', 'Images', 'DOCX', 'Code'].map((t) => {
+        const on = F.formats.includes(t);
+        return { label: t, ...pill(on), pick: () => setF({ formats: on ? F.formats.filter((x) => x !== t) : [...F.formats, t] }) };
+      }),
+      hasFiles: F.files.length > 0,
+      files: F.files.map((x) => ({ ...x, remove: () => setF({ files: this.state.form.files.filter((y) => y.id !== x.id) }) })),
+      addFile: () => {
+        const doc = SAMPLE_DOCS[(S.seq - 1) % SAMPLE_DOCS.length];
+        this.setState({ form: { ...F, files: [...F.files, { id: 'f' + (S.seq + 1), name: doc[0], size: doc[1] }] }, seq: S.seq + 1 });
+      },
+      // Prototype: any input publishes.
+      publish: () => {
+        const title = F.title.trim() || (fCourse === 'CSN-103' ? 'Lab 7: Pointers' : 'New assignment');
+        const d = (F.due || '').split('-');
+        const dueLabel = d.length === 3 ? Number(d[2]) + ' ' + MONTHS[Number(d[1]) - 1] : '16 Nov';
+        const tm = (F.time || '23:59').split(':');
+        const h = Number(tm[0]);
+        const timeLabel = ((h % 12) || 12) + ':' + (tm[1] || '00') + (h < 12 ? ' AM' : ' PM');
+        const item = { id: 'new' + S.seq, course: fCourse, title, posted: '9 Nov', due: dueLabel + ', ' + timeLabel, max: Number(F.max) || 10, stage: 'open', submitted: 0, missed: [], files: F.files.length };
+        this.setState({
+          created: [item, ...S.created],
+          view: { mode: '' },
+          // Land on the list of the course the new assignment belongs to.
+          course: fCourse,
+          toast: title + ' published to ' + fCourse + ' ' + fc.batch + '.',
+          form: { ...F, course: null, title: '', ins: '', files: [] },
+          seq: S.seq + 1
+        });
+      }
+    };
+
+    // ---------- Marks ----------
+    let m = { tiles: [], rows: [], st: {} };
+    if (view.mode === 'marks') {
+      const a = byId(view.id);
+      const c = COURSES[a.course];
+      const roster = c.roster;
+      const mk = marksOf(a.id);
+      const isPub = a.stage === 'published';
+      const n = filled(a, mk);
+      const q = S.query.trim().toLowerCase();
+      const shown = roster.filter((s) => !q || s[1].toLowerCase().includes(q) || s[0].includes(q));
+      const setMark = (enr) => (e) => this.setState({ marks: { ...this.state.marks, [a.id]: { ...marksOf(a.id), [enr]: e.target.value } }, toast: null });
+      const blanks = roster.length - n;
+      // Editing published marks: compare against the marks as they were when editing started.
+      const editing = isPub && S.editing === a.id;
+      const snap = S.snapshot || START[a.id] || {};
+      const norm = (v) => (v === undefined || v === null ? '' : String(v).trim());
+      const changed = editing ? roster.filter((s) => norm(mk[s[0]]) !== norm(snap[s[0]])).length : 0;
+      const readOnly = isPub && !editing;
+      const plural = (k) => k + (k === 1 ? ' student' : ' students');
+      m = {
+        title: a.title, max: a.max, total: roster.length,
+        sub: a.course + ' | ' + c.batch + ' | Out of ' + a.max,
+        editable: !readOnly, readOnly,
+        isEditing: editing,
+        canEdit: readOnly,
+        startEdit: () => this.setState({ editing: a.id, snapshot: { ...mk }, confirm: false, toast: null }),
+        cancelEdit: () => this.setState({ editing: null, confirm: false, toast: null, marks: { ...this.state.marks, [a.id]: snap } }),
+        publishLabel: editing ? 'Save changes' : 'Publish marks to students',
+        publishHint: editing ? 'Only students whose marks change are notified.' : 'Marks save as you type. Students only see them once you publish.',
+        confirmTitle: editing ? 'Update marks for ' + plural(changed) + '?' : 'Publish marks for ' + roster.length + ' students?',
+        confirmCta: editing ? 'Update' : 'Publish',
+        tiles: [
+          { label: 'Submitted', n: a.submitted + '/' + roster.length },
+          { label: 'Entered', n: n + '/' + roster.length },
+          { label: 'Average', n: avg(a) }
+        ],
+        st: isPub
+          ? { bg: '#E3F8EC', fg: '#054F31', dot: '#12893F', title: 'Marks published ' + a.publishedOn, body: 'Students can see their marks under Assignments.' }
+          : { bg: '#FFF4DB', fg: '#4A2800', dot: '#B54708', title: 'Graded by ' + c.prof + ' on ' + a.gradedOn, body: 'Enter the marks from the graded copies, or import the professor’s marks sheet.' },
+        query: S.query,
+        onQuery: (e) => this.setState({ query: e.target.value }),
+        rows: shown.map((s, i) => {
+          const v = mk[s[0]] === undefined ? '' : String(mk[s[0]]);
+          const num = parseFloat(v);
+          const over = !isNaN(num) && (num > a.max || num < 0);
+          return {
+            enr: s[0], name: s[1], val: v || '–',
+            missed: a.missed.includes(s[0]),
+            over,
+            border: over ? '#D92D20' : v ? '#C9D2EC' : '#E3E7F0',
+            bg: over ? '#FDE7E4' : v ? '#F7F8FB' : '#FFFFFF',
+            divider: i === 0 ? '0' : '1px solid #EDF0F6',
+            set: setMark(s[0])
+          };
+        }).map((r) => (readOnly ? r : { ...r, val: r.val === '–' ? '' : r.val })),
+        noRows: shown.length === 0,
+        importSheet: () => this.setState({ marks: { ...this.state.marks, [a.id]: { ...(SHEET[a.id] || {}) } }, toast: 'Imported marks for ' + roster.length + ' students from ' + (a.sheet || 'marks sheet') + '.' }),
+        showPublish: !S.confirm,
+        confirming: S.confirm,
+        confirmBody: editing
+          ? 'The updated marks replace the published ones straight away. These ' + plural(changed) + ' get a notification that their marks changed.'
+          : blanks > 0
+            ? blanks + (blanks === 1 ? ' student has' : ' students have') + ' no marks yet and will show as “Not graded”. Students are notified as soon as you publish.'
+            : 'Students are notified and can see their marks under Assignments right away.',
+        // Saving with nothing changed just leaves edit mode.
+        askPublish: () => (editing && changed === 0
+          ? this.setState({ editing: null, confirm: false, toast: 'No marks were changed.' })
+          : this.setState({ confirm: true, toast: null })),
+        cancelPublish: () => this.setState({ confirm: false }),
+        doPublish: () => (editing
+          ? this.setState({ editing: null, snapshot: null, confirm: false, updated: { ...S.updated, [a.id]: '9 Nov' }, toast: 'Marks updated. ' + plural(changed) + ' notified of the change.' })
+          : this.setState({ published: { ...S.published, [a.id]: '9 Nov' }, confirm: false, toast: 'Marks published to ' + roster.length + ' students.' })),
+        hasToast: !!S.toast,
+        toast: S.toast || ''
+      };
+    }
+
+    return {
+      isList: view.mode !== 'create' && view.mode !== 'marks',
+      isCreate: view.mode === 'create',
+      isMarks: view.mode === 'marks',
+      multi, courseTabs, scope,
+      taBadge: multi ? CODES.length + ' courses' : CODES[0],
+      tiles, groups, f, m,
+      hasToast: !!S.toast && view.mode !== 'marks',
+      toast: S.toast || '',
+      goCreate: go({ mode: 'create' }),
+      goList,
+      cancel: () => this.setState({ view: { mode: '' }, confirm: false, query: '', toast: null }),
+      subBackHref: internal ? '#' : (P.listHref || 'TaAssignments.dc.html'),
+      studentHref: P.studentHref || 'Assignments.dc.html',
+      backHref: P.backHref || 'Main.dc.html',
+      minH: P.minH || '844px'
+    };
+  }
+}
+</script>
+</body>
+</html>

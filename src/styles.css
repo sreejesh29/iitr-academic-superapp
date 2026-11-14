@@ -1,0 +1,114 @@
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; height: 100%; }
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  background: #E4E8F1;
+  color: #0E1726;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- the device viewport ---------- */
+
+.viewport {
+  position: relative;
+  overflow: hidden;
+  background: #13235B;
+  /* Makes position: fixed children (the floating bottom nav) stick to the phone screen */
+  transform: translateZ(0);
+}
+.scroller {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  background: #F3F5FA;
+}
+.scroller::-webkit-scrollbar { display: none; }
+
+/* The design's floating bottom nav sits at the foot of long pages; keep it on screen instead,
+   as the designer's own phone preview does. */
+.viewport nav[aria-label="Main"] { position: fixed !important; }
+
+.status-bar { position: absolute; top: 0; left: 0; right: 0; height: 54px; background: #13235B; }
+.island {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  width: 120px; height: 34px; border-radius: 20px; background: #000; z-index: 30; pointer-events: none;
+}
+.home-indicator {
+  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+  width: 134px; height: 5px; border-radius: 3px; background: #0E1726; z-index: 30; pointer-events: none;
+}
+
+/* ---------- desktop: phone frame + screen list ---------- */
+
+.app-desktop {
+  min-height: 100%;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 48px;
+  padding: 0 32px;
+}
+.stage { display: flex; align-items: center; justify-content: center; padding: 20px 0; }
+.device {
+  position: relative;
+  padding: 12px;
+  border-radius: 60px;
+  background: #0E1726;
+  box-shadow: 0 40px 80px rgba(14, 23, 38, 0.28), 0 0 0 2px #3A4456 inset;
+}
+.device .viewport { border-radius: 48px; }
+.device .btn { position: absolute; width: 3px; background: #2A3346; }
+.device .btn-1 { left: -3px; top: 168px; height: 32px; border-radius: 2px 0 0 2px; }
+.device .btn-2 { left: -3px; top: 220px; height: 56px; border-radius: 2px 0 0 2px; }
+.device .btn-3 { right: -3px; top: 240px; height: 84px; border-radius: 0 2px 2px 0; }
+
+.panel {
+  width: 340px;
+  flex-shrink: 0;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 40px 0 24px;
+}
+.panel-kicker {
+  font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #2448C9;
+}
+.panel h1 { margin: 8px 0 10px; font-size: 26px; line-height: 1.2; font-weight: 800; letter-spacing: -0.4px; color: #13235B; }
+.panel p { margin: 0; font-size: 14px; line-height: 1.55; color: #3A4456; }
+.panel-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+.panel-actions button {
+  height: 40px; padding: 0 16px; border-radius: 12px; border: 1px solid #C9D2EC;
+  background: #FFFFFF; color: #13235B; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.panel-actions button:first-child { background: #13235B; border-color: #13235B; color: #FFFFFF; }
+.panel-actions button:hover { filter: brightness(0.95); }
+.panel-list { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.panel-list-label { font-size: 12px; font-weight: 700; color: #5B6577; text-transform: uppercase; letter-spacing: 0.06em; }
+.panel-list ol {
+  list-style: none; margin: 0; padding: 0 8px 0 0; overflow-y: auto; flex: 1;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.panel-list a {
+  display: block; padding: 7px 10px; border-radius: 10px; font-size: 13px; line-height: 1.35;
+  color: #3A4456; text-decoration: none;
+}
+.panel-list a:hover { background: rgba(19, 35, 91, 0.06); color: #13235B; }
+.panel-list a[aria-current='page'] { background: #13235B; color: #FFFFFF; font-weight: 600; }
+
+/* ---------- phones: the app fills the screen ---------- */
+
+.app-mobile { height: 100dvh; overflow: hidden; background: #13235B; }
+
+.screen-error {
+  padding: 80px 24px; display: flex; flex-direction: column; gap: 12px; align-items: flex-start;
+  font-size: 15px; color: #0E1726; background: #F3F5FA; min-height: 100%;
+}
+.screen-error a { color: #2448C9; font-weight: 700; }

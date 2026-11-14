@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Campus app – Profile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2448C9;text-decoration:none}a:hover{color:#16308F}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+
+<div style="position: relative; width: 390px; min-height: {{minH}}; box-sizing: border-box; background: #F3F5FA; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #0E1726; display: flex; flex-direction: column; overflow-x: clip">
+
+  <!-- Header: solid navy, stays put -->
+  <header style="position: sticky; top: 0; z-index: 0; background: #13235B; padding: 16px 16px 64px; display: flex; flex-direction: column; gap: 18px; color: #FFFFFF">
+    <div style="display: flex; align-items: center; gap: 8px">
+      <a href="{{backHref}}" aria-label="Back" style="width: 44px; height: 44px; border-radius: 14px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+      </a>
+      <h1 style="margin: 0; flex: 1; font-size: 17px; font-weight: 700; letter-spacing: -0.2px">Profile</h1>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 14px; padding: 0 4px">
+      <sc-if value="{{hasPhoto}}" hint-placeholder-val="{{true}}">
+        <span style="position: relative; display: block; width: 64px; height: 64px; flex-shrink: 0; border-radius: 50%; overflow: hidden; background: #DCE4FF; box-shadow: 0 0 0 2px #FFFFFF;"><img src="/_blob/d380e2b78f28a976382d51f88b9181ac" alt="Profile photo of Aarav Mehta" style="position: absolute; left: -205%; top: -46%; height: 300%; width: auto; max-width: none"></span>
+      </sc-if>
+      <sc-if value="{{noPhoto}}" hint-placeholder-val="{{false}}">
+        <span aria-hidden="true" style="width: 64px; height: 64px; flex-shrink: 0; border-radius: 50%; background: #FFFFFF; color: #13235B; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800; letter-spacing: -0.3px">AM</span>
+      </sc-if>
+      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+        <span style="font-size: 20px; font-weight: 700; letter-spacing: -0.3px">Aarav Mehta</span>
+        <span style="font-size: 12px; color: #C9D2EC">23114012 | B.Tech CSE | Sem 5</span>
+        <span style="display: flex; gap: 6px; margin-top: 2px">
+          <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: rgba(255,255,255,0.14); color: #FFFFFF">CGPA {{cgpa}}</span>
+          <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: #FCE7B4; color: #8A4B00">TA | CSN-103</span>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content sheet -->
+  <div style="position: relative; z-index: 1; margin-top: -28px; flex: 1; background: #F3F5FA; border-radius: 28px 28px 0 0; padding: 10px 16px 40px; box-shadow: 0 -10px 30px rgba(14,23,38,0.22); display: flex; flex-direction: column; gap: 24px">
+    <div aria-hidden="true" style="width: 40px; height: 5px; margin: 0 auto -14px; border-radius: 3px; background: #C9D2EC"></div>
+
+    <!-- Tabs -->
+    <div role="tablist" aria-label="Profile sections" style="display: flex; gap: 4px; padding: 4px; border-radius: 14px; background: #E3E7F0">
+      <sc-for list="{{tabs}}" as="t" hint-placeholder-count="2">
+        <button type="button" role="tab" aria-selected="{{t.on}}" onClick="{{t.pick}}" style="flex: 1; height: 40px; border: 0; border-radius: 11px; background: {{t.bg}}; color: {{t.fg}}; font-size: 14px; font-weight: 700; box-shadow: {{t.shadow}}">{{t.label}}</button>
+      </sc-for>
+    </div>
+
+    <!-- ===== DETAILS ===== -->
+    <sc-if value="{{isDetails}}" hint-placeholder-val="{{true}}">
+      <div style="display: flex; flex-direction: column; gap: 24px">
+
+        <!-- Personal -->
+        <section aria-labelledby="pers-h" style="display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+            <h2 id="pers-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Personal details</h2>
+            <button type="button" onClick="{{toggleEdit}}" style="flex-shrink: 0; height: 36px; padding: 0 4px; border: 0; background: transparent; color: #2448C9; font-size: 14px; font-weight: 700">{{editLabel}}</button>
+          </div>
+
+          <!-- View mode -->
+          <sc-if value="{{viewing}}" hint-placeholder-val="{{true}}">
+            <dl style="margin: 0; padding: 4px 16px; background: #FFFFFF; border-radius: 20px; display: flex; flex-direction: column">
+              <sc-for list="{{personal}}" as="p" hint-placeholder-count="9">
+                <div style="display: flex; flex-direction: column; gap: 2px; padding: 12px 0; border-top: {{p.divider}}">
+                  <dt style="font-size: 12px; font-weight: 600; color: #5B6577">{{p.k}}</dt>
+                  <dd style="margin: 0; font-size: 14px; font-weight: 600; color: #0E1726; overflow-wrap: anywhere">{{p.v}}</dd>
+                </div>
+              </sc-for>
+              <div style="display: flex; flex-direction: column; gap: 6px; padding: 12px 0; border-top: 1px solid #EDF0F6">
+                <dt style="font-size: 12px; font-weight: 600; color: #5B6577">Signature</dt>
+                <dd style="margin: 0; width: 160px; height: 56px; border-radius: 10px; background: #F7F8FB; border: 1px solid #EDF0F6; display: flex; align-items: center; justify-content: center">
+                  <svg role="img" aria-label="Signature of Aarav Mehta" width="128" height="40" viewBox="0 0 128 40" fill="none" stroke="#13235B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 30c6-14 10-22 13-22s-2 20 2 20 6-12 9-12-1 10 3 10 5-9 9-9 0 9 4 9c5 0 7-14 12-14s-3 14 2 14 8-10 12-10-2 10 3 10 9-6 12-8 6 2 10-2 7-6 12-6"></path><path d="M14 34c30-3 70-4 104-6"></path></svg>
+                </dd>
+              </div>
+            </dl>
+          </sc-if>
+
+          <!-- Edit mode -->
+          <sc-if value="{{editing}}" hint-placeholder-val="{{false}}">
+            <div style="margin: 0; padding: 16px; background: #FFFFFF; border-radius: 20px; display: flex; flex-direction: column; gap: 16px">
+              <!-- Photo -->
+              <div style="display: flex; align-items: center; gap: 14px; padding-bottom: 16px; border-bottom: 1px solid #EDF0F6">
+                <sc-if value="{{hasPhoto}}" hint-placeholder-val="{{true}}">
+                  <span style="position: relative; display: block; width: 64px; height: 64px; flex-shrink: 0; border-radius: 50%; overflow: hidden; background: #DCE4FF;"><img src="/_blob/d380e2b78f28a976382d51f88b9181ac" alt="Profile photo of Aarav Mehta" style="position: absolute; left: -205%; top: -46%; height: 300%; width: auto; max-width: none"></span>
+                </sc-if>
+                <sc-if value="{{noPhoto}}" hint-placeholder-val="{{false}}">
+                  <span aria-hidden="true" style="width: 64px; height: 64px; flex-shrink: 0; border-radius: 50%; background: #13235B; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800">AM</span>
+                </sc-if>
+                <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+                  <span style="font-size: 14px; font-weight: 700">Profile photo</span>
+                  <span style="display: flex; gap: 16px">
+                    <button type="button" onClick="{{changePhoto}}" style="padding: 4px 0; border: 0; background: transparent; color: #2448C9; font-size: 13px; font-weight: 700">{{photoAction}}</button>
+                    <sc-if value="{{hasPhoto}}" hint-placeholder-val="{{true}}">
+                      <button type="button" onClick="{{removePhoto}}" style="padding: 4px 0; border: 0; background: transparent; color: #B42318; font-size: 13px; font-weight: 700">Remove photo</button>
+                    </sc-if>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Fields -->
+              <sc-for list="{{fields}}" as="f" hint-placeholder-count="9">
+                <div style="display: flex; flex-direction: column; gap: 6px">
+                  <label for="{{f.id}}" style="font-size: 12px; font-weight: 600; color: #5B6577">{{f.k}}</label>
+                  <sc-if value="{{f.isText}}" hint-placeholder-val="{{true}}">
+                    <input id="{{f.id}}" type="{{f.type}}" defaultValue="{{f.v}}" style="height: 44px; box-sizing: border-box; padding: 0 12px; border-radius: 12px; border: 1px solid #E3E7F0; background: #FFFFFF; color: #0E1726; font-family: inherit; font-size: 14px; font-weight: 600">
+                  </sc-if>
+                  <sc-if value="{{f.isSelect}}" hint-placeholder-val="{{false}}">
+                    <select id="{{f.id}}" defaultValue="{{f.v}}" style="height: 44px; box-sizing: border-box; padding: 0 10px; border-radius: 12px; border: 1px solid #E3E7F0; background: #FFFFFF; color: #0E1726; font-family: inherit; font-size: 14px; font-weight: 600">
+                      <option>Male</option>
+                      <option>Female</option>
+                      <option>Non-binary</option>
+                      <option>Prefer not to say</option>
+                    </select>
+                  </sc-if>
+                  <sc-if value="{{f.isLocked}}" hint-placeholder-val="{{false}}">
+                    <span id="{{f.id}}" style="min-height: 44px; box-sizing: border-box; padding: 12px; border-radius: 12px; background: #F7F8FB; color: #5B6577; font-size: 14px; font-weight: 600">{{f.v}}</span>
+                    <span style="font-size: 12px; color: #697285">{{f.note}}</span>
+                  </sc-if>
+                </div>
+              </sc-for>
+
+              <!-- Signature -->
+              <div style="display: flex; flex-direction: column; gap: 6px">
+                <span style="font-size: 12px; font-weight: 600; color: #5B6577">Signature</span>
+                <div style="display: flex; align-items: center; gap: 14px">
+                  <span style="width: 160px; height: 56px; flex-shrink: 0; border-radius: 10px; background: #F7F8FB; border: 1px solid #EDF0F6; display: flex; align-items: center; justify-content: center">
+                    <svg role="img" aria-label="Current signature" width="128" height="40" viewBox="0 0 128 40" fill="none" stroke="#13235B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 30c6-14 10-22 13-22s-2 20 2 20 6-12 9-12-1 10 3 10 5-9 9-9 0 9 4 9c5 0 7-14 12-14s-3 14 2 14 8-10 12-10-2 10 3 10 9-6 12-8 6 2 10-2 7-6 12-6"></path><path d="M14 34c30-3 70-4 104-6"></path></svg>
+                  </span>
+                  <button type="button" style="padding: 4px 0; border: 0; background: transparent; color: #2448C9; font-size: 13px; font-weight: 700">Upload new</button>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 8px; padding-top: 4px">
+                <button type="button" onClick="{{toggleEdit}}" style="flex: 1; height: 48px; border-radius: 14px; border: 1px solid #E3E7F0; background: #FFFFFF; color: #13235B; font-size: 14px; font-weight: 700">Cancel</button>
+                <button type="button" onClick="{{save}}" style="flex: 1; height: 48px; border-radius: 14px; border: 0; background: #13235B; color: #FFFFFF; font-size: 14px; font-weight: 700">Save changes</button>
+              </div>
+            </div>
+          </sc-if>
+        </section>
+
+        <!-- Academic -->
+        <section aria-labelledby="acad-h" style="display: flex; flex-direction: column; gap: 12px">
+          <h2 id="acad-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Academic details</h2>
+          <div style="background: #FFFFFF; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+            <dl style="margin: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px">
+              <sc-for list="{{acadTiles}}" as="f" hint-placeholder-count="4">
+                <div style="padding: 10px 12px; border-radius: 12px; background: #F7F8FB; display: flex; flex-direction: column; gap: 2px; min-width: 0">
+                  <dt style="font-size: 12px; font-weight: 600; color: #5B6577">{{f.k}}</dt>
+                  <dd style="margin: 0; font-size: 15px; font-weight: 700; color: #0E1726; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{f.v}}</dd>
+                </div>
+              </sc-for>
+            </dl>
+            <dl style="margin: 0; display: flex; flex-direction: column">
+              <sc-for list="{{academic}}" as="p" hint-placeholder-count="3">
+                <div style="display: flex; flex-direction: column; gap: 2px; padding: 10px 0; border-top: 1px solid #EDF0F6">
+                  <dt style="font-size: 12px; font-weight: 600; color: #5B6577">{{p.k}}</dt>
+                  <dd style="margin: 0; font-size: 14px; font-weight: 600; color: #0E1726">{{p.v}}</dd>
+                </div>
+              </sc-for>
+            </dl>
+          </div>
+        </section>
+
+        <!-- Faculty coordinator -->
+        <section aria-labelledby="ta-h" style="display: flex; flex-direction: column; gap: 12px">
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <h2 id="ta-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Teaching assistantship</h2>
+              <span style="font-size: 13px; color: #5B6577">Autumn 2026</span>
+            </div>
+            <div style="background: #FFFFFF; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+              <div style="display: flex; align-items: flex-start; gap: 12px">
+                
+                <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; font-weight: 700; letter-spacing: 0.3px; color: rgb(91, 101, 119)">CSN-103</span>
+                  <span style="font-size: 15px; font-weight: 700">Fundamentals of Programming</span>
+                  <span style="font-size: 12px; color: rgb(91, 101, 119)">Professor - Dr. V. Arora</span>
+                </div>
+                
+              </div>
+              <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column">
+                <sc-for list="{{taSessions}}" as="s" hint-placeholder-count="2">
+                  <li style="display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-top: 1px solid #EDF0F6">
+                    <span style="width: 64px; flex-shrink: 0; margin-top: 2px; font-size: 12px; font-weight: 700; color: #2448C9">{{s.day}}</span>
+                    <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                      <span style="font-size: 14px; font-weight: 600">{{s.kind}} | {{s.time}}</span>
+                      <span style="font-size: 12px; color: #5B6577">{{s.where}}</span>
+                    </span>
+                  </li>
+                </sc-for>
+              </ul>
+              
+            </div>
+          </section><section aria-labelledby="fc-h" style="display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <h2 id="fc-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Faculty coordinator</h2>
+            <span style="font-size: 13px; color: #5B6577">Batch 2023 | B.Tech CSE</span>
+          </div>
+          <div style="background: #FFFFFF; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+            <div style="display: flex; align-items: center; gap: 12px">
+              <span aria-hidden="true" style="width: 48px; height: 48px; flex-shrink: 0; border-radius: 50%; background: #EEF2FF; color: #2448C9; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800">RM</span>
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                <span style="font-size: 15px; font-weight: 700">Prof. R. Menon</span>
+                <span style="font-size: 12px; color: #5B6577">Associate Professor | CSE</span>
+              </div>
+            </div>
+            <dl style="margin: 0; display: flex; flex-direction: column">
+              <sc-for list="{{coord}}" as="p" hint-placeholder-count="3">
+                <div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid #EDF0F6">
+                  <dt style="font-size: 13px; color: #5B6577">{{p.k}}</dt>
+                  <dd style="margin: 0; font-size: 13px; font-weight: 600; color: #0E1726; text-align: right; min-width: 0; overflow-wrap: anywhere">{{p.v}}</dd>
+                </div>
+              </sc-for>
+            </dl>
+            <div style="display: flex; gap: 8px">
+              <!-- Equal-weight pair: same size, fill and type -->
+              <a href="mailto:r.menon@cs.iitr.ac.in" aria-label="Email Prof. R. Menon" style="flex: 1; min-width: 0; height: 44px; box-sizing: border-box; border-radius: 12px; border: 0; background: #13235B; color: #FFFFFF; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px">
+                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg>
+                Email
+              </a>
+              <a href="tel:+911332285000" aria-label="Call Prof. R. Menon" style="flex: 1; min-width: 0; height: 44px; box-sizing: border-box; border-radius: 12px; border: 1px solid #E3E7F0; background: #FFFFFF; color: #13235B; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px">
+                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"></path></svg>
+                <span>Call</span>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Teaching assistantship -->
+        <sc-if value="{{isTA}}" hint-placeholder-val="{{true}}">
+
+        </sc-if>
+
+        <!-- Notification preferences: one switch per channel -->
+        <section aria-labelledby="np-h" style="display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <h2 id="np-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Notifications</h2>
+            <span style="font-size: 13px; color: #5B6577">Choose how you hear about classes, assignments and notices</span>
+          </div>
+          <ul style="margin: 0; padding: 0 16px; list-style: none; background: #FFFFFF; border-radius: 20px; display: flex; flex-direction: column">
+            <sc-for list="{{notifs}}" as="n" hint-placeholder-count="3">
+              <li style="display: flex; align-items: center; gap: 12px; padding: 14px 0; border-top: {{n.divider}}">
+                <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                  <span id="{{n.id}}" style="font-size: 14px; font-weight: 700">{{n.label}}</span>
+                  <span style="font-size: 12px; line-height: 1.4; color: #5B6577; overflow-wrap: anywhere">{{n.sub}}</span>
+                </span>
+                <button type="button" role="switch" aria-checked="{{n.checked}}" aria-labelledby="{{n.id}}" onClick="{{n.toggle}}" style="position: relative; flex-shrink: 0; width: 48px; height: 28px; padding: 0; border: 0; border-radius: 999px; background: {{n.track}}; transition: background 0.2s">
+                  <span aria-hidden="true" style="position: absolute; top: 3px; left: {{n.knobX}}; width: 22px; height: 22px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 1px 3px rgba(14,23,38,0.25); transition: left 0.2s"></span>
+                </button>
+              </li>
+            </sc-for>
+          </ul>
+          <sc-if value="{{allNotifsOff}}" hint-placeholder-val="{{false}}">
+            <p role="status" style="margin: 0; padding: 10px 12px; border-radius: 12px; background: #FFF4DB; font-size: 12px; line-height: 1.45; color: #4A2800">All notifications are off. You’ll still see updates when you open the app, but won’t be alerted about attendance portals or deadlines.</p>
+          </sc-if>
+        </section>
+
+        <!-- Log out -->
+        <button type="button" style="height: 48px; border-radius: 14px; border: 1px solid #F5C2BC; background: #FFFFFF; color: #B42318; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5M21 12H9"></path></svg>
+          Log out
+        </button>
+      </div>
+    </sc-if>
+
+    <!-- ===== GRADES ===== -->
+    <sc-if value="{{isGrades}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; flex-direction: column; gap: 20px">
+
+        <!-- Overall -->
+        <dl style="margin: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px">
+          <div style="padding: 14px; border-radius: 16px; background: #13235B; color: #FFFFFF; display: flex; flex-direction: column; gap: 2px">
+            <dt style="font-size: 12px; font-weight: 600; color: #C9D2EC">CGPA</dt>
+            <dd style="margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px">{{cgpa}}</dd>
+            <dd style="margin: 0; font-size: 12px; color: #C9D2EC">After {{doneSems}} semesters</dd>
+          </div>
+          <div style="padding: 14px; border-radius: 16px; background: #FFFFFF; display: flex; flex-direction: column; gap: 2px">
+            <dt style="font-size: 12px; font-weight: 600; color: #5B6577">Credits earned</dt>
+            <dd style="margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px">{{credits}}</dd>
+            <dd style="margin: 0; font-size: 12px; color: #5B6577">of 160 to graduate</dd>
+          </div>
+        </dl>
+
+        <!-- Semester switcher -->
+        <section aria-labelledby="sem-h" style="display: flex; flex-direction: column; gap: 12px">
+          <h2 id="sem-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Semester grades</h2>
+          <div role="tablist" aria-label="Semester" style="display: flex; gap: 8px; overflow-x: auto; margin: 0 -16px; padding: 0 16px; scrollbar-width: none">
+            <sc-for list="{{semChips}}" as="c" hint-placeholder-count="5">
+              <button type="button" role="tab" aria-selected="{{c.on}}" onClick="{{c.pick}}" style="flex-shrink: 0; height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid {{c.border}}; background: {{c.bg}}; color: {{c.fg}}; font-size: 13px; font-weight: 700">{{c.label}}</button>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{semDone}}" hint-placeholder-val="{{true}}">
+            <div style="background: #FFFFFF; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px">
+                <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+                  <span style="font-size: 15px; font-weight: 700">{{sem.name}}</span>
+                  <span style="font-size: 12px; color: #5B6577">{{sem.term}} | {{sem.credits}} credits</span>
+                </div>
+                <div style="flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 0">
+                  <span style="font-size: 12px; font-weight: 600; color: #5B6577">SGPA</span>
+                  <span style="font-size: 22px; font-weight: 800; letter-spacing: -0.4px; color: #13235B">{{sem.sgpa}}</span>
+                </div>
+              </div>
+
+              <ul aria-label="Course grades" style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column">
+                <sc-for list="{{sem.courses}}" as="g" hint-placeholder-count="5">
+                  <li style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid #EDF0F6">
+                    <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                      <span style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{g.name}}</span>
+                      <span style="font-size: 12px; color: #5B6577">{{g.code}} | {{g.cr}} credits</span>
+                    </span>
+                    <span aria-label="{{g.aria}}" style="flex-shrink: 0; min-width: 28px; text-align: right; font-size: 15px; font-weight: 800; color: #0E1726">{{g.grade}}</span>
+                  </li>
+                </sc-for>
+              </ul>
+
+              <a href="#" aria-label="{{sem.dlLabel}}" style="height: 48px; border-radius: 14px; background: #13235B; color: #FFFFFF; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px">
+                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path></svg>
+                Download report card
+              </a>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{semOngoing}}" hint-placeholder-val="{{false}}">
+            <div style="background: #FFFFFF; border-radius: 20px; padding: 24px 16px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center">
+              <span style="font-size: 15px; font-weight: 700">Semester 5 is in progress</span>
+              <span style="font-size: 13px; line-height: 1.5; color: #5B6577">Grades and the report card come out after the end-semester exams.</span>
+            </div>
+          </sc-if>
+        </section>
+
+        <!-- Grade key -->
+        <p style="margin: 0; font-size: 12px; line-height: 1.6; color: #5B6577">Grade points: A+ = 10 | A = 9 | B+ = 8 | B = 7 | C+ = 6 | C = 5 | F = Fail</p>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2172}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    // notif: notification channels the student has switched on.
+    this.state = { tab: null, sem: null, editing: null, photo: true, notif: { app: true, email: true, sms: false } };
+  }
+  renderVals() {
+    const S = this.state;
+    const tab = S.tab || this.props.tab || 'details';
+    const PTS = { 'A+': 10, A: 9, 'B+': 8, B: 7, 'C+': 6, C: 5 };
+    const GRADE_INK = {
+      'A+': ['#E3F8EC', '#067647'], A: ['#E3F8EC', '#067647'],
+      'B+': ['#EEF2FF', '#2448C9'], B: ['#EEF2FF', '#2448C9'],
+      'C+': ['#FFF4DB', '#8A4B00'], C: ['#FFF4DB', '#8A4B00']
+    };
+
+    const SEMS = [
+      { n: 1, term: 'Autumn 2023', courses: [
+        ['CSN-101', 'Introduction to Computer Science', 4, 'A+'],
+        ['MAN-001', 'Mathematics I', 4, 'A'],
+        ['PHN-005', 'Electromagnetic Theory', 4, 'B+'],
+        ['EEN-112', 'Electrical Science', 4, 'B+'],
+        ['HSN-001', 'Communication Skills', 2, 'A'] ] },
+      { n: 2, term: 'Spring 2024', courses: [
+        ['CSN-102', 'Data Structures', 4, 'A+'],
+        ['MAN-002', 'Mathematics II', 4, 'A'],
+        ['ECN-104', 'Digital Logic Design', 4, 'A'],
+        ['CYN-002', 'Engineering Chemistry', 4, 'B'],
+        ['HSN-002', 'Society, Culture and Ethics', 2, 'A'] ] },
+      { n: 3, term: 'Autumn 2024', courses: [
+        ['CSN-212', 'Design and Analysis of Algorithms', 4, 'A+'],
+        ['CSN-221', 'Computer Architecture', 4, 'A'],
+        ['CSN-291', 'Object Oriented Analysis and Design', 4, 'A'],
+        ['MAN-201', 'Discrete Mathematics', 4, 'B+'],
+        ['CSN-261', 'Data Structures Laboratory', 2, 'A+'] ] },
+      { n: 4, term: 'Spring 2025', courses: [
+        ['CSN-232', 'Operating Systems', 4, 'A'],
+        ['CSN-254', 'Database Management Systems', 4, 'A+'],
+        ['CSN-252', 'System Software', 4, 'B+'],
+        ['ECN-254', 'Signals and Systems', 4, 'B'],
+        ['HSN-252', 'Engineering Economics', 3, 'A'] ] }
+    ];
+    const sumCr = (cs) => cs.reduce((s, c) => s + c[2], 0);
+    const sumPts = (cs) => cs.reduce((s, c) => s + c[2] * PTS[c[3]], 0);
+    const all = SEMS.flatMap((s) => s.courses);
+    const cgpa = (sumPts(all) / sumCr(all)).toFixed(2);
+    const credits = sumCr(all);
+
+    const semPick = S.sem || this.props.sem || 4;
+    const semChips = [1, 2, 3, 4, 5].map((n) => {
+      const on = n === semPick;
+      return {
+        label: n === 5 ? 'Sem 5 | Ongoing' : 'Sem ' + n,
+        on: on ? 'true' : 'false',
+        bg: on ? '#13235B' : '#FFFFFF',
+        fg: on ? '#FFFFFF' : '#3A4456',
+        border: on ? '#13235B' : '#E3E7F0',
+        pick: () => this.setState({ sem: n })
+      };
+    });
+    const picked = SEMS.find((s) => s.n === semPick);
+    const sem = picked ? {
+      name: 'Semester ' + picked.n,
+      term: picked.term,
+      credits: sumCr(picked.courses),
+      sgpa: (sumPts(picked.courses) / sumCr(picked.courses)).toFixed(2),
+      dlLabel: 'Download report card for semester ' + picked.n + ', PDF',
+      courses: picked.courses.map(([code, name, cr, grade]) => ({
+        code, name, cr, grade,
+        bg: GRADE_INK[grade][0], fg: GRADE_INK[grade][1],
+        aria: 'Grade ' + grade
+      }))
+    } : { name: '', term: '', credits: 0, sgpa: '', dlLabel: '', courses: [] };
+
+    const tabs = [['details', 'Details'], ['grades', 'Grades']].map(([id, label]) => {
+      const on = tab === id;
+      return {
+        label, on: on ? 'true' : 'false',
+        bg: on ? '#FFFFFF' : 'transparent',
+        fg: on ? '#13235B' : '#5B6577',
+        shadow: on ? '0 1px 3px rgba(14,23,38,0.12)' : 'none',
+        pick: () => this.setState({ tab: id })
+      };
+    });
+
+    // kind: text (editable input), select (gender), locked (set by the institute)
+    const PERSONAL = [
+      { id: 'pf-father', k: "Father's name", v: 'Rajesh Mehta', kind: 'text' },
+      { id: 'pf-mother', k: "Mother's name", v: 'Sunita Mehta', kind: 'text' },
+      { id: 'pf-gender', k: 'Gender', v: 'Male', kind: 'select' },
+      { id: 'pf-dob', k: 'Date of birth', v: '14 March 2005', kind: 'locked', note: 'Contact the academic office to correct this' },
+      { id: 'pf-email', k: 'Institute email', v: 'aarav_m@cs.iitr.ac.in', kind: 'locked', note: 'Set by the institute' },
+      { id: 'pf-pemail', k: 'Personal email', v: 'aarav.mehta05@gmail.com', kind: 'text', type: 'email' },
+      { id: 'pf-phone', k: 'Phone', v: '+91 98290 41736', kind: 'text', type: 'tel' },
+      { id: 'pf-blood', k: 'Blood group', v: 'B+', kind: 'text' },
+      { id: 'pf-hostel', k: 'Hostel', v: 'Rajendra Bhawan | Room 214', kind: 'locked', note: 'Allotted by the hostel office' },
+      { id: 'pf-addr', k: 'Home address', v: '12, Shanti Nagar, Jaipur, Rajasthan 302006', kind: 'text' }
+    ];
+    const personal = PERSONAL.map((p, i) => ({ k: p.k, v: p.v, divider: i === 0 ? '0' : '1px solid #EDF0F6' }));
+    const fields = PERSONAL.map((p) => ({
+      ...p,
+      type: p.type || 'text',
+      note: p.note || '',
+      isText: p.kind === 'text',
+      isSelect: p.kind === 'select',
+      isLocked: p.kind === 'locked'
+    }));
+    const editing = S.editing === null ? !!this.props.editing : S.editing;
+    const hasPhoto = S.photo;
+
+    const acadTiles = [
+      { k: 'CGPA', v: cgpa },
+      { k: 'Credits earned', v: credits + ' / 160' },
+      { k: 'Current semester', v: '5 | Autumn 2026' },
+      { k: 'Batch', v: '2023 – 2027' }
+    ];
+    const academic = [
+      { k: 'Programme', v: 'B.Tech Computer Science and Engineering' },
+      { k: 'Department', v: 'Computer Science and Engineering' },
+      { k: 'Academic status', v: 'Regular | No backlogs' }
+    ];
+    const coord = [
+      { k: 'Email', v: 'r.menon@cs.iitr.ac.in' },
+      { k: 'Office', v: 'CSE Building, Room 312' },
+      { k: 'TA', v: 'Kavya Nair' }
+    ];
+    const taSessions = [
+      { day: 'Tuesday', kind: 'Lab', time: '14:00 – 17:00', where: 'Lab 2, CSE' },
+      { day: 'Thursday', kind: 'Tutorial', time: '16:00 – 17:00', where: 'LHC 104' }
+    ];
+
+    return {
+      tabs, personal, fields, acadTiles, academic, coord, taSessions,
+      editing, viewing: !editing,
+      editLabel: editing ? 'Cancel' : 'Edit',
+      toggleEdit: () => this.setState({ editing: !editing }),
+      save: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ editing: false }); },
+      hasPhoto, noPhoto: !hasPhoto,
+      photoAction: hasPhoto ? 'Change photo' : 'Upload photo',
+      changePhoto: () => this.setState({ photo: true }),
+      removePhoto: () => this.setState({ photo: false }),
+      isDetails: tab === 'details',
+      isGrades: tab === 'grades',
+      isTA: true,
+      notifs: [
+        ['app', 'In-app notifications', 'Alerts in the app and on your lock screen'],
+        ['email', 'Email', 'Sent to aarav_m@cs.iitr.ac.in'],
+        ['sms', 'SMS', 'Sent to your registered mobile number']
+      ].map(([k, label, sub], i) => {
+        const on = !!this.state.notif[k];
+        return {
+          id: 'np-' + k, label, sub,
+          checked: on ? 'true' : 'false',
+          track: on ? '#13235B' : '#C3C9D6',
+          knobX: on ? '23px' : '3px',
+          divider: i === 0 ? '0' : '1px solid #EDF0F6',
+          toggle: () => this.setState({ notif: { ...this.state.notif, [k]: !this.state.notif[k] } })
+        };
+      }),
+      allNotifsOff: !this.state.notif.app && !this.state.notif.email && !this.state.notif.sms,
+      cgpa, credits, doneSems: SEMS.length,
+      semChips, sem,
+      semDone: !!picked,
+      semOngoing: !picked,
+      backHref: this.props.backHref || 'Main.dc.html',
+      minH: this.props.minH || '844px'
+    };
+  }
+}
+</script>
+</body>
+</html>

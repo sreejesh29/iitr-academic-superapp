@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Campus app – Leave</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2448C9;text-decoration:none}a:hover{color:#16308F}
+button{font-family:inherit;cursor:pointer}
+textarea::placeholder{color:#697285}
+select{font-family:inherit}
+</style>
+</helmet>
+
+<div style="position: relative; width: 390px; min-height: {{minH}}; box-sizing: border-box; background: #F3F5FA; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #0E1726; display: flex; flex-direction: column; overflow-x: clip">
+
+  <!-- Header: solid navy, stays put -->
+  <header style="position: sticky; top: 0; z-index: 0; background: #13235B; padding: 16px 16px 52px; display: flex; flex-direction: column; gap: 16px; color: #FFFFFF">
+    <div style="display: flex; align-items: center; gap: 8px">
+      <a href="{{backHref}}" aria-label="Back" style="width: 44px; height: 44px; border-radius: 14px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+      </a>
+      <div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0">
+        <h1 style="margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.3">Leave</h1>
+        <span style="font-size: 12px; color: #C9D2EC">Academic Year 2026-27</span>
+      </div>
+    </div>
+
+    <!-- Yearly balance -->
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+      <div style="padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.12); display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 12px; color: #C9D2EC">Available</span>
+        <span style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px">{{bal.left}}<span style="font-size: 14px; font-weight: 700; color: #C9D2EC">/15</span></span>
+      </div>
+      <div style="padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.12); display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 12px; color: #C9D2EC">Used</span>
+        <span style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px">{{bal.used}}</span>
+      </div>
+      <div style="padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.12); display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 12px; color: #C9D2EC">Pending</span>
+        <span style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px">{{bal.pending}}</span>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div role="tablist" aria-label="Leave sections" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 14px; background: rgba(255,255,255,0.12)">
+      <sc-for list="{{tabs}}" as="t" hint-placeholder-count="2">
+        <button role="tab" aria-selected="{{t.selected}}" onClick="{{t.pick}}" style="height: 40px; border-radius: 10px; border: 0; background: {{t.bg}}; color: {{t.fg}}; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px">
+          {{t.label}}
+          <sc-if value="{{t.hasCount}}" hint-placeholder-val="{{false}}">
+            <span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 6px; background: {{t.countBg}}; color: #FFFFFF; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{t.count}}</span>
+          </sc-if>
+        </button>
+      </sc-for>
+    </div>
+  </header>
+
+  <!-- Content sheet -->
+  <div role="tabpanel" aria-label="{{panelLabel}}" style="position: relative; z-index: 1; margin-top: -28px; flex: 1; background: #F3F5FA; border-radius: 28px 28px 0 0; padding: 10px 16px 32px; box-shadow: 0 -10px 30px rgba(14,23,38,0.22); display: flex; flex-direction: column; gap: 24px">
+    <div aria-hidden="true" style="width: 40px; height: 5px; margin: 0 auto -10px; border-radius: 3px; background: #C9D2EC"></div>
+
+    <!-- ================= APPLY ================= -->
+    <sc-if value="{{isApply}}" hint-placeholder-val="{{true}}">
+      <div style="display: flex; flex-direction: column; gap: 24px">
+
+        <!-- Dates -->
+        <section aria-labelledby="dates-h" style="display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <h2 id="dates-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Dates</h2>
+            
+          </div>
+          <div style="background: #FFFFFF; border: 1px solid #E3E7F0; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px">
+              <div style="padding: 10px 12px; border-radius: 12px; background: #F7F8FB; display: flex; flex-direction: column; gap: 2px">
+                <span style="font-size: 12px; font-weight: 600; color: #5B6577">From</span>
+                <span style="font-size: 15px; font-weight: 700">{{range.fromLabel}}</span>
+              </div>
+              <div style="padding: 10px 12px; border-radius: 12px; background: #F7F8FB; display: flex; flex-direction: column; gap: 2px">
+                <span style="font-size: 12px; font-weight: 600; color: #5B6577">To</span>
+                <span style="font-size: 15px; font-weight: 700; color: {{range.toInk}}">{{range.toLabel}}</span>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between">
+              <span style="font-size: 15px; font-weight: 700">November 2026</span>
+              <span style="display: flex; gap: 4px">
+                <button type="button" aria-label="Previous month" style="width: 32px; height: 32px; border-radius: 10px; border: 1px solid #E3E7F0; background: #FFFFFF; color: #3A4456; display: flex; align-items: center; justify-content: center">
+                  <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+                </button>
+                <button type="button" aria-label="Next month" style="width: 32px; height: 32px; border-radius: 10px; border: 1px solid #E3E7F0; background: #FFFFFF; color: #3A4456; display: flex; align-items: center; justify-content: center">
+                  <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+                </button>
+              </span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); row-gap: 4px">
+              <sc-for list="{{weekdays}}" as="w" hint-placeholder-count="7">
+                <span aria-hidden="true" style="height: 24px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #5B6577">{{w}}</span>
+              </sc-for>
+              <sc-for list="{{cells}}" as="c" hint-placeholder-count="36">
+                <span style="height: 40px; display: flex; align-items: center; justify-content: center; background: {{c.band}}; border-radius: {{c.bandRadius}}">
+                  <button type="button" onClick="{{c.pick}}" disabled="{{c.disabled}}" aria-label="{{c.aria}}" aria-pressed="{{c.pressed}}" style="visibility: {{c.vis}}; width: 38px; height: 38px; border-radius: 10px; border: {{c.border}}; background: {{c.bg}}; color: {{c.fg}}; font-size: 14px; font-weight: {{c.weight}}; cursor: {{c.cursor}}; padding: 0">{{c.label}}</button>
+                </span>
+              </sc-for>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px; padding-top: 12px; border-top: 1px solid #EDF0F6">
+              <span style="font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 6px; background: #DCE4FF; color: #2448C9">{{range.daysLabel}}</span>
+              <span style="font-size: 13px; color: {{range.afterInk}}">{{range.afterMsg}}</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Leave type -->
+        <section aria-labelledby="type-h" style="display: flex; flex-direction: column; gap: 12px">
+          <h2 id="type-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Type of leave</h2>
+          <div role="radiogroup" aria-labelledby="type-h" style="display: flex; flex-direction: column; gap: 8px">
+            <sc-for list="{{types}}" as="t" hint-placeholder-count="3">
+              <button type="button" role="radio" aria-checked="{{t.checked}}" onClick="{{t.pick}}" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; border: {{t.border}}; background: #FFFFFF; text-align: left; color: #0E1726">
+                <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                  <span style="font-size: 15px; font-weight: 700">{{t.label}}</span>
+                  <span style="font-size: 12px; line-height: 1.4; color: #5B6577">{{t.desc}}</span>
+                </span>
+                <span aria-hidden="true" style="width: 22px; height: 22px; flex-shrink: 0; box-sizing: border-box; border-radius: 50%; border: {{t.dotBorder}}; background: #FFFFFF; display: flex; align-items: center; justify-content: center">
+                  <span style="width: 10px; height: 10px; border-radius: 50%; background: {{t.dot}}"></span>
+                </span>
+              </button>
+            </sc-for>
+          </div>
+        </section>
+
+        <!-- Medical document: only for medical leave over 3 days -->
+        <sc-if value="{{needDoc}}" hint-placeholder-val="{{true}}">
+          <section aria-labelledby="doc-h" style="display: flex; flex-direction: column; gap: 12px">
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <div style="display: flex; align-items: center; gap: 8px">
+                <h2 id="doc-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Medical document</h2>
+                <span style="font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: #FDE7E4; color: #B42318">Required</span>
+              </div>
+              <span style="font-size: 13px; color: #5B6577">Medical leave over 3 days needs a certificate or prescription</span>
+            </div>
+            <sc-if value="{{noFile}}" hint-placeholder-val="{{true}}">
+              <button type="button" onClick="{{attach}}" style="padding: 20px 16px; border-radius: 20px; border: 1.5px dashed {{docBorder}}; background: #FFFFFF; display: flex; flex-direction: column; align-items: center; gap: 8px; color: #0E1726">
+                <span aria-hidden="true" style="width: 44px; height: 44px; border-radius: 12px; background: #EEF2FF; color: #2448C9; display: flex; align-items: center; justify-content: center">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M17 8l-5-5-5 5M12 3v12"></path></svg>
+                </span>
+                <span style="font-size: 14px; font-weight: 700">Upload document</span>
+                <span style="font-size: 12px; color: #5B6577">PDF, JPG or PNG, up to 5 MB</span>
+              </button>
+            </sc-if>
+            <sc-if value="{{hasFile}}" hint-placeholder-val="{{false}}">
+              <div style="display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 16px; background: #FFFFFF; border: 1px solid #E3E7F0">
+                <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px">
+                  <span style="font-size: 13px; font-weight: 700">Medical certificate – Campus hospital.pdf</span>
+                  <span style="font-size: 12px; color: #5B6577">640 KB</span>
+                </span>
+                <button type="button" onClick="{{detach}}" aria-label="Remove document" style="width: 36px; height: 36px; flex-shrink: 0; border-radius: 10px; border: 0; background: transparent; color: #5B6577; display: flex; align-items: center; justify-content: center">
+                  <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+                </button>
+              </div>
+            </sc-if>
+            <sc-if value="{{showDocError}}" hint-placeholder-val="{{false}}">
+              <p role="alert" style="margin: 0; font-size: 13px; font-weight: 600; color: #B42318">Upload a medical document to submit this request.</p>
+            </sc-if>
+          </section>
+        </sc-if>
+
+        <!-- Reason -->
+        <section style="display: flex; flex-direction: column; gap: 12px">
+          <label for="reason" style="font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Reason</label>
+          <textarea id="reason" rows="3" placeholder="Briefly say why you need this leave" style="box-sizing: border-box; width: 100%; padding: 12px 14px; border-radius: 16px; border: 1px solid #E3E7F0; background: #FFFFFF; font-family: inherit; font-size: 14px; line-height: 1.5; color: #0E1726; resize: none; outline: none">{{reasonText}}</textarea>
+        </section>
+
+        <!-- TA duties -->
+        <section aria-labelledby="ta-h" style="display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <h2 id="ta-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Hand over TA duties</h2>
+            <span style="font-size: 13px; color: #5B6577">Your TA sessions in these dates. Dr. V. Arora is notified.</span>
+          </div>
+          <sc-if value="{{hasDuties}}" hint-placeholder-val="{{true}}">
+            <div style="background: #FFFFFF; border: 1px solid #E3E7F0; border-radius: 20px; padding: 4px 16px; display: flex; flex-direction: column">
+              <sc-for list="{{duties}}" as="d" hint-placeholder-count="2">
+                <div style="padding: 12px 0; border-top: {{d.divider}}; display: flex; flex-direction: column; gap: 10px">
+                  <div style="display: flex; align-items: center; gap: 8px">
+                    <span style="font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: {{d.tagBg}}; color: {{d.tagFg}}">{{d.kind}}</span>
+                    <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.3px; color: #5B6577">CSN-103</span>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 2px">
+                    <span style="font-size: 14px; font-weight: 700">{{d.when}}</span>
+                    <span style="font-size: 12px; color: #5B6577">{{d.where}}</span>
+                  </div>
+                  <label style="display: flex; flex-direction: column; gap: 6px">
+                    <span style="font-size: 12px; font-weight: 600; color: #3A4456">Delegate to</span>
+                    <span style="position: relative; display: block">
+                      <select aria-label="{{d.aria}}" style="width: 100%; height: 44px; box-sizing: border-box; padding: 0 40px 0 12px; border-radius: 12px; border: 1px solid #E3E7F0; background: #F7F8FB; font-size: 14px; font-weight: 600; color: #0E1726; appearance: none; -webkit-appearance: none; outline: none">
+                        <option>Meera Iyer | TA, CSN-103</option>
+                        <option>Sahil Gupta | TA, CSN-103</option>
+                        <option>Aditya Rao | TA, CSN-103</option>
+                      </select>
+                      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B6577" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; right: 12px; top: 13px; pointer-events: none"><path d="m6 9 6 6 6-6"></path></svg>
+                    </span>
+                  </label>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{noDuties}}" hint-placeholder-val="{{false}}">
+            <p style="margin: 0; padding: 14px 16px; border-radius: 16px; background: #FFFFFF; border: 1px solid #E3E7F0; font-size: 13px; color: #3A4456">No TA sessions fall in these dates.</p>
+          </sc-if>
+        </section>
+
+        <!-- Routing + submit -->
+        <section style="display: flex; flex-direction: column; gap: 12px">
+          <p style="margin: 0; display: flex; gap: 10px; padding: 12px; border-radius: 12px; background: #EEF2FF; font-size: 13px; line-height: 1.45; color: #13235B">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2448C9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg>
+            <span>Goes to your faculty advisor, Prof. R. Menon, for approval.</span>
+          </p>
+          <button type="button" onClick="{{submit}}" disabled="{{cantSubmit}}" style="height: 48px; border-radius: 12px; border: 0; background: {{submitBg}}; color: #FFFFFF; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: {{submitCursor}}">
+            Submit request | {{range.daysLabel}}
+          </button>
+        </section>
+      </div>
+    </sc-if>
+
+    <!-- ================= STATUS ================= -->
+    <sc-if value="{{isStatus}}" hint-placeholder-val="{{false}}">
+      <section aria-labelledby="req-h" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+          <h2 id="req-h" style="margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.2px">Leave requests</h2>
+          <button type="button" onClick="{{toggleSort}}" aria-label="{{sortAria}}" style="height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid #E3E7F0; background: #FFFFFF; color: #0E1726; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"></path></svg>
+            {{sortLabel}}
+          </button>
+        </div>
+
+        <!-- Filter by type -->
+        <div role="group" aria-label="Filter by leave type" style="display: flex; gap: 8px; overflow-x: auto">
+          <sc-for list="{{filters}}" as="f" hint-placeholder-count="4">
+            <button type="button" onClick="{{f.pick}}" aria-pressed="{{f.pressed}}" style="flex-shrink: 0; height: 34px; padding: 0 14px; border-radius: 999px; border: {{f.border}}; background: {{f.bg}}; color: {{f.fg}}; font-size: 13px; font-weight: 700">{{f.label}}</button>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{noRequests}}" hint-placeholder-val="{{false}}">
+          <p style="margin: 0; padding: 20px 16px; border-radius: 20px; background: #FFFFFF; border: 1px solid #E3E7F0; font-size: 14px; color: #3A4456; text-align: center">{{emptyMsg}}</p>
+        </sc-if>
+
+        <sc-for list="{{requests}}" as="r" hint-placeholder-count="3">
+          <article aria-label="{{r.type}} leave, {{r.dates}}, {{r.statusLabel}}" style="background: #FFFFFF; border: 1px solid #E3E7F0; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+            <div style="display: flex; align-items: center; gap: 8px">
+              <span style="font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 6px; background: {{r.typeBg}}; color: {{r.typeFg}}">{{r.type}}</span>
+              <span style="flex: 1"></span>
+              <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 6px; background: {{r.statusBg}}; color: {{r.statusFg}}">{{r.statusLabel}}</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 4px">
+              <h3 style="margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.3">{{r.dates}}</h3>
+              <span style="font-size: 13px; color: #3A4456">{{r.daysLabel}} | Applied {{r.applied}}</span>
+              <span style="font-size: 13px; line-height: 1.45; color: #5B6577">{{r.reason}}</span>
+            </div>
+
+            <!-- Approval track -->
+            <ol aria-label="Approval steps" style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column">
+              <sc-for list="{{r.steps}}" as="s" hint-placeholder-count="3">
+                <li style="display: flex; gap: 12px">
+                  <span aria-hidden="true" style="display: flex; flex-direction: column; align-items: center; width: 22px; flex-shrink: 0">
+                    <span style="width: 22px; height: 22px; box-sizing: border-box; border-radius: 50%; background: {{s.dotBg}}; border: {{s.dotBorder}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+                      <sc-if value="{{s.done}}" hint-placeholder-val="{{true}}">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg>
+                      </sc-if>
+                      <sc-if value="{{s.current}}" hint-placeholder-val="{{false}}">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: #FFFFFF"></span>
+                      </sc-if>
+                    </span>
+                    <span style="flex: 1; width: 2px; min-height: 12px; background: {{s.line}}"></span>
+                  </span>
+                  <span style="flex: 1; min-width: 0; padding-bottom: {{s.pad}}; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px">
+                    <span style="display: flex; flex-direction: column; gap: 1px">
+                      <span style="font-size: 13px; font-weight: 700; color: {{s.ink}}">{{s.label}}</span>
+                      <span style="font-size: 12px; color: #5B6577">{{s.who}}</span>
+                    </span>
+                    <span style="flex-shrink: 0; font-size: 12px; font-weight: 600; color: {{s.noteInk}}">{{s.note}}</span>
+                  </span>
+                </li>
+              </sc-for>
+            </ol>
+
+            <div style="display: flex; align-items: center; gap: 8px; padding-top: 12px; border-top: 1px solid #EDF0F6; font-size: 12px; color: #3A4456">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B6577" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 11 2 2 4-4"></path></svg>
+              <span>{{r.ta}}</span>
+            </div>
+
+            <sc-if value="{{r.isPending}}" hint-placeholder-val="{{false}}">
+              <button type="button" onClick="{{r.cancel}}" style="height: 44px; border-radius: 12px; border: 1px solid #F4C7C2; background: #FFFFFF; color: #B42318; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+                Cancel request
+              </button>
+            </sc-if>
+          </article>
+        </sc-for>
+      </section>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"startTab":{"editor":"enum","options":["apply","status"],"default":"apply"},"$preview":{"width":390,"height":2013}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { tab: null, from: 16, to: 19, type: 'Medical', file: false, tried: false, submitted: [], cancelled: [], sort: 'newest', filter: 'All' };
+  }
+  renderVals() {
+    const S = this.state;
+    const tab = S.tab || this.props.startTab || 'apply';
+    const isApply = tab === 'apply';
+
+    // November 2026 starts on a Sunday. Today is Thu 12 Nov.
+    const TODAY = 12;
+    const DAYS = 30;
+    const WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const wd = (d) => WD[(d - 1) % 7];
+    const fmt = (d) => wd(d) + ', ' + d + ' Nov';
+    const plural = (n) => n + (n === 1 ? ' day' : ' days');
+
+    const TYPE = {
+      Medical:    { bg: '#FDE7E4', fg: '#B42318', desc: 'Illness, injury or a medical appointment' },
+      Outstation: { bg: '#DCE4FF', fg: '#2448C9', desc: 'Field work, conferences or institute duty' },
+      Casual:     { bg: '#FCE7B4', fg: '#8A4B00', desc: 'Personal or family reasons' }
+    };
+
+    // Requests already on record. Used and pending days come from these.
+    const BASE = [
+      { type: 'Outstation', dates: '23 Nov – 24 Nov', days: 2, applied: '10 Nov', status: 'pending',
+        reason: 'Field study for the networks project at C-DOT, New Delhi.',
+        steps: [['done', '10 Nov'], ['current', 'Waiting']],
+        ta: 'CSN-103 Lab on 24 Nov handed to Meera Iyer' },
+      { type: 'Medical', dates: '6 Nov', days: 1, applied: '6 Nov', status: 'approved',
+        reason: 'Viral fever. Advised rest by the campus hospital.',
+        steps: [['done', '6 Nov'], ['done', 'Approved 7 Nov']],
+        ta: 'No TA sessions on this day' },
+      { type: 'Casual', dates: '12 Mar – 13 Mar', days: 2, applied: '2 Mar', status: 'approved',
+        reason: 'Sister’s wedding at home.',
+        steps: [['done', '2 Mar'], ['done', 'Approved 3 Mar']],
+        ta: 'CSN-103 Tutorial on 12 Mar handed to Sahil Gupta' }
+    ];
+    // Cancelled requests drop out of the pending count and free their days.
+    const all = [...S.submitted, ...BASE].map((r) => {
+      const key = r.type + '|' + r.dates + '|' + r.applied;
+      return S.cancelled.includes(key) && r.status === 'pending'
+        ? { ...r, key, status: 'cancelled', steps: r.steps.map((s) => (s[0] === 'current' ? ['todo', 'Cancelled 12 Nov'] : s)) }
+        : { ...r, key };
+    });
+    const used = all.filter((r) => r.status === 'approved').reduce((s, r) => s + r.days, 0);
+    const pendingDays = all.filter((r) => r.status === 'pending').reduce((s, r) => s + r.days, 0);
+    const pendingCount = all.filter((r) => r.status === 'pending').length;
+    const left = 15 - used - pendingDays;
+
+    // ---- Date range ----
+    const from = S.from, to = S.to;
+    const end = to || from;
+    const days = end - from + 1;
+    const after = left - days;
+    const range = {
+      fromLabel: fmt(from),
+      toLabel: to ? fmt(to) : 'Pick a day',
+      toInk: to ? '#0E1726' : '#697285',
+      daysLabel: plural(days),
+      afterMsg: after >= 0 ? plural(after) + ' left after this' : 'Only ' + plural(left) + ' left this year',
+      afterInk: after >= 0 ? '#3A4456' : '#B42318'
+    };
+    const pickDay = (d) => {
+      if (!S.from || S.to) this.setState({ from: d, to: null, tried: false });
+      else if (d < S.from) this.setState({ from: d, tried: false });
+      else this.setState({ to: d, tried: false });
+    };
+    const lead = 6; // Mon-first grid; 1 Nov is a Sunday
+    const cells = [];
+    for (let i = 0; i < lead; i++) cells.push({ label: '', vis: 'hidden', disabled: true, band: 'transparent', bandRadius: '0', bg: 'transparent', fg: '#0E1726', border: '0', weight: 600, cursor: 'default', aria: '', pressed: 'false', pick: () => {} });
+    for (let d = 1; d <= DAYS; d++) {
+      const past = d < TODAY;
+      const isEnd = d === from || d === to;
+      const inRange = d >= from && d <= end;
+      const isToday = d === TODAY;
+      const col = (lead + d - 1) % 7;
+      const first = d === from || col === 0;
+      const last = d === end || col === 6;
+      cells.push({
+        label: String(d),
+        vis: 'visible',
+        disabled: past,
+        band: inRange && from !== end ? '#EEF2FF' : 'transparent',
+        bandRadius: (first ? '12px ' : '0 ') + (last ? '12px 12px ' : '0 0 ') + (first ? '12px' : '0'),
+        bg: isEnd ? '#13235B' : 'transparent',
+        fg: isEnd ? '#FFFFFF' : past ? '#B3BACA' : '#0E1726',
+        border: isToday && !isEnd ? '1.5px solid #2F5BEA' : '0',
+        weight: isEnd || isToday ? 800 : 600,
+        cursor: past ? 'default' : 'pointer',
+        aria: fmt(d) + (past ? ', unavailable' : ''),
+        pressed: inRange ? 'true' : 'false',
+        pick: () => { if (!past) pickDay(d); }
+      });
+    }
+
+    // ---- Type ----
+    const types = Object.keys(TYPE).map((k) => {
+      const on = k === S.type;
+      return {
+        label: k, initial: k[0], desc: TYPE[k].desc, bg: TYPE[k].bg, fg: TYPE[k].fg,
+        checked: on ? 'true' : 'false',
+        border: on ? '1.5px solid #13235B' : '1px solid #E3E7F0',
+        dotBorder: on ? '2px solid #13235B' : '2px solid #C3C9D6',
+        dot: on ? '#13235B' : 'transparent',
+        pick: () => this.setState({ type: k, tried: false })
+      };
+    });
+    const needDoc = S.type === 'Medical' && days > 3;
+
+    // ---- TA duties: CSN-103 lab on Tuesdays, tutorial on Thursdays ----
+    const duties = [];
+    for (let d = from; d <= end; d++) {
+      if (wd(d) === 'Tue') duties.push({ kind: 'Lab', when: fmt(d) + ', 14:00 – 17:00', where: 'Fundamentals of programming | Lab 2, CSE' });
+      if (wd(d) === 'Thu') duties.push({ kind: 'Tutorial', when: fmt(d) + ', 16:00 – 17:00', where: 'Fundamentals of programming | LHC 104' });
+    }
+    const dutyList = duties.map((x, i) => ({
+      ...x,
+      divider: i === 0 ? '0' : '1px solid #EDF0F6',
+      tagBg: x.kind === 'Lab' ? '#C8F0D8' : '#FCE7B4',
+      tagFg: x.kind === 'Lab' ? '#067647' : '#8A4B00',
+      aria: 'Delegate ' + x.kind + ' on ' + x.when + ' to'
+    }));
+
+    const reasonText = S.type === 'Medical'
+      ? 'Fever and throat infection. Advised four days of rest by the campus hospital.'
+      : S.type === 'Outstation' ? 'Presenting a paper at a conference.' : 'Family function at home.';
+
+    const cantSubmit = !S.to || after < 0;
+    const submit = () => {
+      if (cantSubmit) return;
+      if (needDoc && !S.file) { this.setState({ tried: true }); return; }
+      const dates = S.to === S.from ? from + ' Nov' : from + ' Nov – ' + end + ' Nov';
+      const req = {
+        type: S.type, dates, days, applied: '12 Nov', status: 'pending', reason: reasonText,
+        steps: [['done', '12 Nov'], ['current', 'Waiting']],
+        ta: dutyList.length ? dutyList.length + ' TA ' + (dutyList.length === 1 ? 'session' : 'sessions') + ' handed to Meera Iyer' : 'No TA sessions in these dates'
+      };
+      this.setState({ submitted: [req, ...S.submitted], tab: 'status', tried: false, file: false });
+    };
+
+    // ---- Status ----
+    const STEP = [
+      { label: 'Submitted', who: 'You' },
+      { label: 'Faculty advisor', who: 'Prof. R. Menon' }
+    ];
+    // `all` is newest first; sort flips it, filter narrows it by type.
+    const ordered = S.sort === 'oldest' ? [...all].reverse() : all;
+    const shown = S.filter === 'All' ? ordered : ordered.filter((r) => r.type === S.filter);
+    const filters = ['All', 'Medical', 'Outstation', 'Casual'].map((k) => {
+      const on = k === S.filter;
+      return {
+        label: k,
+        pressed: on ? 'true' : 'false',
+        bg: on ? '#13235B' : '#FFFFFF',
+        fg: on ? '#FFFFFF' : '#3A4456',
+        border: on ? '1px solid #13235B' : '1px solid #E3E7F0',
+        pick: () => this.setState({ filter: k })
+      };
+    });
+    const requests = shown.map((r) => {
+      const pending = r.status === 'pending';
+      const cancelled = r.status === 'cancelled';
+      const curIdx = r.steps.findIndex((s) => s[0] === 'current');
+      return {
+        ...r,
+        typeBg: TYPE[r.type].bg, typeFg: TYPE[r.type].fg,
+        daysLabel: plural(r.days),
+        isPending: pending,
+        cancel: () => this.setState({ cancelled: [...S.cancelled, r.key] }),
+        statusLabel: pending ? 'Pending' : cancelled ? 'Cancelled' : 'Approved',
+        statusBg: pending ? '#FFF4DB' : cancelled ? '#EDF0F6' : '#E3F8EC',
+        statusFg: pending ? '#8A4B00' : cancelled ? '#3A4456' : '#067647',
+        pendingWith: curIdx >= 0 ? STEP[curIdx].who + ', ' + STEP[curIdx].label.toLowerCase() : '',
+        steps: r.steps.map((s, i) => {
+          const st = s[0];
+          const lastStep = i === r.steps.length - 1;
+          return {
+            label: STEP[i].label, who: STEP[i].who, note: s[1],
+            done: st === 'done', current: st === 'current',
+            dotBg: st === 'done' ? '#12893F' : st === 'current' ? '#F5A524' : '#FFFFFF',
+            dotBorder: st === 'todo' ? '2px solid #C3C9D6' : '0',
+            line: lastStep ? 'transparent' : (st === 'done' ? '#12893F' : '#E3E7F0'),
+            ink: st === 'todo' ? '#5B6577' : '#0E1726',
+            noteInk: st === 'current' ? '#8A4B00' : '#5B6577',
+            pad: lastStep ? '0' : '12px'
+          };
+        })
+      };
+    });
+
+    const tabs = [
+      { key: 'apply', label: 'Apply', count: 0 },
+      { key: 'status', label: 'My requests', count: pendingCount }
+    ].map((t) => {
+      const on = t.key === tab;
+      return {
+        ...t,
+        selected: on ? 'true' : 'false',
+        bg: on ? '#FFFFFF' : 'transparent',
+        fg: on ? '#13235B' : '#FFFFFF',
+        hasCount: t.count > 0,
+        countBg: on ? '#F5A524' : 'rgba(255,255,255,0.2)',
+        pick: () => this.setState({ tab: t.key })
+      };
+    });
+
+    return {
+      tabs, isApply, isStatus: !isApply,
+      panelLabel: isApply ? 'Apply for leave' : 'My requests',
+      bal: { left, used, pending: pendingDays },
+      weekdays: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+      cells, range, types,
+      needDoc, hasFile: S.file, noFile: !S.file,
+      docBorder: S.tried && !S.file ? '#D92D20' : '#C3C9D6',
+      showDocError: S.tried && !S.file,
+      attach: () => this.setState({ file: true, tried: false }),
+      detach: () => this.setState({ file: false }),
+      reasonText,
+      duties: dutyList, hasDuties: dutyList.length > 0, noDuties: dutyList.length === 0,
+      cantSubmit,
+      submitBg: cantSubmit ? '#9AA3B8' : '#13235B',
+      submitCursor: cantSubmit ? 'not-allowed' : 'pointer',
+      submit,
+      requests, filters,
+      noRequests: requests.length === 0,
+      emptyMsg: 'No ' + S.filter.toLowerCase() + ' leave requests yet.',
+      sortLabel: S.sort === 'oldest' ? 'Oldest first' : 'Newest first',
+      sortAria: 'Sorted ' + (S.sort === 'oldest' ? 'oldest first' : 'newest first') + '. Tap to reverse.',
+      toggleSort: () => this.setState({ sort: S.sort === 'oldest' ? 'newest' : 'oldest' }),
+      backHref: this.props.backHref || 'Main.dc.html',
+      minH: this.props.minH || '844px'
+    };
+  }
+}
+</script>
+</body>
+</html>

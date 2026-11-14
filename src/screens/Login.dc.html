@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Campus app – Log in</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2448C9;text-decoration:none}a:hover{color:#16308F}
+button{font-family:inherit;cursor:pointer}
+input::placeholder{color:#8A93A6}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</helmet>
+
+<div style="position: relative; width: 390px; min-height: {{minH}}; box-sizing: border-box; background: #13235B; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #0E1726; display: flex; flex-direction: column; overflow-x: clip">
+
+  <!-- Brand -->
+  <header style="padding: 56px 24px 44px; display: flex; flex-direction: column; align-items: center; gap: 16px; color: #FFFFFF; text-align: center">
+    <span style="width: 84px; height: 84px; border-radius: 50%; background: #FFFFFF; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,0,0,0.25)">
+      <img src="/_blob/d18d465b4769a29a78cdbd57de8676e7" alt="IIT Roorkee logo" style="width: 76px; height: 76px; object-fit: contain">
+    </span>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <h1 style="margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px">IIT Roorkee</h1>
+      <span style="font-size: 14px; line-height: 1.5; color: #C9D2EC">Academic Super App</span>
+    </div>
+  </header>
+
+  <!-- Sheet -->
+  <main style="flex: 1; background: #FFFFFF; border-radius: 28px 28px 0 0; padding: 28px 24px 32px; display: flex; flex-direction: column; gap: 24px">
+
+    <!-- ===== STEP 1: identifier ===== -->
+    <sc-if value="{{isLogin}}" hint-placeholder-val="{{true}}">
+      <div style="margin: 0; display: flex; flex-direction: column; gap: 20px">
+        <h2 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.3px">Log in</h2>
+
+        <!-- Labels are visually hidden (the placeholders say the same) but kept for screen readers -->
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <label for="login-id" class="sr">Enrollment number or email</label>
+          <div style="display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 14px; border-radius: 14px; border: {{idBorder}}; background: #FFFFFF">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B6577" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>
+            <input id="login-id" type="text" inputMode="email" autoComplete="username" autoCapitalize="none" spellCheck="false" value="{{id}}" onChange="{{onId}}" placeholder="Enrollment number or email" aria-invalid="{{idInvalid}}" aria-describedby="login-id-err" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; color: #0E1726; font-family: inherit; font-size: 15px; font-weight: 600">
+          </div>
+          <sc-if value="{{hasIdError}}" hint-placeholder-val="{{false}}">
+            <span id="login-id-err" role="alert" style="font-size: 12px; font-weight: 600; color: #B42318">{{idError}}</span>
+          </sc-if>
+        </div>
+
+        <!-- Password -->
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <label for="login-pw" class="sr">Password</label>
+          <div style="display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 6px 0 14px; border-radius: 14px; border: {{pwBorder}}; background: #FFFFFF">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B6577" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+            <input id="login-pw" type="{{pwType}}" autoComplete="current-password" value="{{pw}}" onChange="{{onPw}}" placeholder="Enter your password" aria-invalid="{{pwInvalid}}" aria-describedby="login-pw-err" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; color: #0E1726; font-family: inherit; font-size: 15px; font-weight: 600">
+            <button type="button" onClick="{{togglePw}}" aria-label="{{pwToggleLabel}}" aria-pressed="{{pwShown}}" style="width: 40px; height: 40px; flex-shrink: 0; border: 0; border-radius: 10px; background: transparent; color: #5B6577; display: flex; align-items: center; justify-content: center">
+              <sc-if value="{{pwHidden}}" hint-placeholder-val="{{true}}">
+                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </sc-if>
+              <sc-if value="{{pwVisible}}" hint-placeholder-val="{{false}}">
+                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.6 5.1A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-2.4 3.3M6.6 6.6A17.6 17.6 0 0 0 2 12s3.5 7 10 7a9.7 9.7 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2M2 2l20 20"></path></svg>
+              </sc-if>
+            </button>
+          </div>
+          <sc-if value="{{hasPwError}}" hint-placeholder-val="{{false}}">
+            <span id="login-pw-err" role="alert" style="font-size: 12px; font-weight: 600; color: #B42318">{{pwError}}</span>
+          </sc-if>
+          <a href="{{forgotHref}}" style="align-self: flex-end; padding: 4px 0; font-size: 13px; font-weight: 700">Forgot password?</a>
+        </div>
+
+        <!-- Wrong credentials: no OTP is sent -->
+        <sc-if value="{{badCreds}}" hint-placeholder-val="{{false}}">
+          <p role="alert" style="margin: -4px 0 0; display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; border-radius: 12px; background: #FDE7E4; font-size: 13px; font-weight: 600; line-height: 1.45; color: #7A1A12">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B42318" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+            The enrollment number, email or password is incorrect. Check them and try again.
+          </p>
+        </sc-if>
+
+        <button type="button" onClick="{{sendOtp}}" style="height: 52px; border-radius: 14px; border: 0; background: {{loginBg}}; color: #FFFFFF; font-size: 15px; font-weight: 700">Log in</button>
+      </div>
+    </sc-if>
+
+    <!-- ===== STEP 2: OTP ===== -->
+    <sc-if value="{{isOtp}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; flex-direction: column; gap: 20px">
+        <button type="button" onClick="{{back}}" style="align-self: flex-start; margin: -16px 0 -14px -8px; height: 36px; padding: 0 8px; border: 0; background: transparent; color: #2448C9; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 4px">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+          Go back
+        </button>
+
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <h2 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.3px">Enter the code</h2>
+          <span style="font-size: 14px; line-height: 1.5; color: #5B6577">We sent a 5-digit code to <strong style="font-weight: 700; color: #0E1726">{{masked}}</strong></span>
+        </div>
+
+        <!-- One real input sits over five display boxes, so typing, pasting and SMS autofill all work -->
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <label for="otp" style="font-size: 13px; font-weight: 700; color: #3A4456">Verification code</label>
+          <div style="position: relative; display: flex; justify-content: space-between; gap: 10px">
+            <sc-for list="{{boxes}}" as="b" hint-placeholder-count="5">
+              <span aria-hidden="true" style="flex: 1; height: 60px; box-sizing: border-box; border-radius: 14px; border: {{b.border}}; background: {{b.bg}}; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; color: #0E1726">{{b.digit}}</span>
+            </sc-for>
+            <input id="otp" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength="5" value="{{otp}}" onChange="{{onOtp}}" aria-describedby="otp-help" style="position: absolute; inset: 0; width: 100%; height: 100%; box-sizing: border-box; opacity: 0; border: 0; font-size: 16px; caret-color: transparent">
+          </div>
+          <span id="otp-help" style="font-size: 12px; color: #5B6577">{{otpHelp}}</span>
+        </div>
+
+        <sc-if value="{{otpReady}}" hint-placeholder-val="{{false}}">
+          <a href="{{homeHref}}" style="height: 52px; border-radius: 14px; background: #13235B; color: #FFFFFF; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center">Verify and continue</a>
+        </sc-if>
+        <sc-if value="{{otpNotReady}}" hint-placeholder-val="{{true}}">
+          <button type="button" disabled="" style="height: 52px; border-radius: 14px; border: 0; background: #C9D2EC; color: #FFFFFF; font-size: 15px; font-weight: 700; cursor: not-allowed">Verify and continue</button>
+        </sc-if>
+
+        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; color: #5B6577">
+          Didn’t get it?
+          <sc-if value="{{canResend}}" hint-placeholder-val="{{false}}">
+            <button type="button" onClick="{{resend}}" style="height: 36px; padding: 0 4px; border: 0; background: transparent; color: #2448C9; font-size: 13px; font-weight: 700">Resend code</button>
+          </sc-if>
+          <sc-if value="{{waitResend}}" hint-placeholder-val="{{true}}">
+            <span style="font-weight: 700; color: #3A4456">Resend in 0:{{resendLeft}}</span>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <p style="margin: auto 0 0; font-size: 12px; line-height: 1.5; color: #5B6577; text-align: center">Trouble logging in? <a href="#" style="font-weight: 700">Contact the IT helpdesk</a></p>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"enum","options":["login","otp"],"default":"login"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      step: props.step || 'login',
+      id: props.userId || '',
+      pw: '',
+      showPw: false,
+      badCreds: false,
+      otp: props.otp || '',
+      tried: false,
+      resend: props.step === 'otp' ? 24 : 0
+    };
+  }
+  componentDidMount() {
+    this.timer = setInterval(() => {
+      if (this.state.step === 'otp' && this.state.resend > 0) this.setState({ resend: this.state.resend - 1 });
+    }, 1000);
+  }
+  componentWillUnmount() {
+    clearInterval(this.timer);
+  }
+  renderVals() {
+    const S = this.state;
+    const id = S.id.trim();
+    const isEnroll = /^\d{8}$/.test(id);
+    const isEmail = /^[^@\s]+@([a-z]+\.)?iitr\.ac\.in$/i.test(id);
+    const valid = isEnroll || isEmail;
+    const showErr = S.tried && !valid;
+    const pwMissing = S.tried && !S.pw;
+
+    // The code goes to the institute email on record; mask it on screen
+    const email = isEmail ? id.toLowerCase() : 'aarav_m@cs.iitr.ac.in';
+    const [user, domain] = email.split('@');
+    const masked = user.length > 2 ? user[0] + '*'.repeat(user.length - 2) + user[user.length - 1] + '@' + domain : email;
+
+    const boxes = [0, 1, 2, 3, 4].map((i) => {
+      const filled = i < S.otp.length;
+      const active = i === S.otp.length;
+      return {
+        digit: S.otp[i] || '',
+        border: active ? '2px solid #2F5BEA' : filled ? '1.5px solid #13235B' : '1.5px solid #E3E7F0',
+        bg: filled ? '#F7F8FB' : '#FFFFFF'
+      };
+    });
+    const ready = S.otp.length === 5;
+
+    return {
+      isLogin: S.step === 'login',
+      isOtp: S.step === 'otp',
+      id: S.id,
+      onId: (e) => this.setState({ id: e.target.value, tried: false, badCreds: false }),
+      idInvalid: showErr || S.badCreds ? 'true' : 'false',
+      hasIdError: showErr,
+      idError: showErr ? (id ? 'Enter an 8-digit enrollment number or an @iitr.ac.in email' : 'Enter your enrollment number or email') : '',
+      idBorder: showErr || S.badCreds ? '1.5px solid #D92D20' : '1.5px solid #E3E7F0',
+
+      pw: S.pw,
+      onPw: (e) => this.setState({ pw: e.target.value, tried: false, badCreds: false }),
+      pwType: S.showPw ? 'text' : 'password',
+      pwShown: S.showPw ? 'true' : 'false',
+      pwHidden: !S.showPw,
+      pwVisible: S.showPw,
+      pwToggleLabel: S.showPw ? 'Hide password' : 'Show password',
+      togglePw: () => this.setState({ showPw: !S.showPw }),
+      hasPwError: pwMissing,
+      pwError: 'Enter your password',
+      pwInvalid: pwMissing || S.badCreds ? 'true' : 'false',
+      pwBorder: pwMissing || S.badCreds ? '1.5px solid #D92D20' : '1.5px solid #E3E7F0',
+      badCreds: S.badCreds,
+      forgotHref: this.props.forgotHref || 'ForgotPassword.dc.html',
+
+      loginBg: '#13235B',
+      // Prototype: dummy data, so any username and password move on to the OTP step
+      sendOtp: (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        this.setState({ step: 'otp', otp: '', resend: 30, badCreds: false, tried: false });
+      },
+      masked,
+      boxes,
+      otp: S.otp,
+      onOtp: (e) => this.setState({ otp: String(e.target.value).replace(/\D/g, '').slice(0, 5) }),
+      otpHelp: ready ? 'Code entered' : (5 - S.otp.length) + ' digits left',
+      // Prototype: any code (even a partial one) verifies
+      otpReady: true,
+      otpNotReady: false,
+      canResend: S.resend === 0,
+      waitResend: S.resend > 0,
+      resendLeft: String(S.resend).padStart(2, '0'),
+      resend: () => this.setState({ resend: 30, otp: '' }),
+      back: () => this.setState({ step: 'login', otp: '', pw: '' }),
+      homeHref: this.props.homeHref || 'Main.dc.html',
+      minH: this.props.minH || '844px'
+    };
+  }
+}
+</script>
+</body>
+</html>
